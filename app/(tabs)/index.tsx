@@ -1,24 +1,23 @@
-import React, { useState, useEffect } from "react";
-import translate from "translate";
-import * as Speech from "expo-speech";
 import * as Clipboard from "expo-clipboard";
+import * as Speech from "expo-speech";
+import { useSQLiteContext } from "expo-sqlite";
+import React, { useEffect, useState } from "react";
 import {
-  View,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  StyleSheet,
+  View,
 } from "react-native";
-import { useSQLiteContext } from "expo-sqlite";
+import translate from "translate";
 
-import Language from "@/models/Language";
-import DBProvider from "@/utils/database";
-import Translation from "@/models/Translation";
-import { Ionicons } from "@expo/vector-icons";
-import Languages from "@/constants/Languages";
 import LanguageChangedBox from "@/components/LanguageChangedBox";
-import { useAppSelector } from "@/features/hook";
+import Languages from "@/constants/Languages";
+import Language from "@/models/Language";
+import Translation from "@/models/Translation";
+import DBProvider from "@/utils/database";
+import { Ionicons } from "@expo/vector-icons";
 
 const HomePage = ({
   sourceText = "",

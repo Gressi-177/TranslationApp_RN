@@ -1,48 +1,51 @@
-import React from "react";
-import { View, Image, TouchableOpacity, StyleSheet } from "react-native";
-
 import Languages from "@/constants/Languages";
-import { Dropdown } from "react-native-element-dropdown";
+import useStoreGlobal from "@/stores/useStoreGlobal";
 import { Ionicons } from "@expo/vector-icons";
-import { setSourceLang, setTargetLang } from "@/features/slices/base";
-import { useDispatch } from "react-redux";
-import { useAppSelector } from "@/features/hook";
+import React, { useCallback } from "react";
+import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Dropdown } from "react-native-element-dropdown";
 
 const LanguageChangedBox = () => {
-  const sourceLanguage = useAppSelector((state) => state.base.sourceLang);
-  const targetLanguage = useAppSelector((state) => state.base.targetLang);
+  const sourceLanguage = useStoreGlobal((state) => state.sourceLang);
+  const targetLanguage = useStoreGlobal((state) => state.targetLang);
+  const setSourceLang = useStoreGlobal((state) => state.setSourceLang);
+  const setTargetLang = useStoreGlobal((state) => state.setTargetLang);
+  const swapLanguages = useStoreGlobal((state) => state.swapLanguages);
 
-  const dispatch = useDispatch();
+  const renderSourceIcon = useCallback(
+    () => (
+      <Image
+        source={sourceLanguage.img}
+        style={styles.flagImage}
+        width={24}
+        height={24}
+      />
+    ),
+    [sourceLanguage.img]
+  );
 
-  const swapLanguages = () => {
-    dispatch(setSourceLang(targetLanguage));
-    dispatch(setTargetLang(sourceLanguage));
-  };
+  const renderTargetIcon = useCallback(
+    () => (
+      <Image
+        source={targetLanguage.img}
+        style={styles.flagImage}
+        width={24}
+        height={24}
+      />
+    ),
+    [targetLanguage.img]
+  );
 
   return (
     <View style={styles.container}>
       <View style={styles.languageContainer}>
         <Dropdown
-          labelField={"name"}
-          valueField={"code"}
+          labelField="name"
+          valueField="code"
           data={Languages}
-          renderLeftIcon={(visible) => (
-            <Image
-              source={sourceLanguage.img}
-              style={{ marginRight: 5 }}
-              width={24}
-              height={24}
-            />
-          )}
+          renderLeftIcon={renderSourceIcon}
           value={sourceLanguage.code}
-          onChange={(itemValue) => {
-            if (itemValue.code !== targetLanguage.code) {
-              dispatch(setSourceLang(itemValue));
-            } else {
-              dispatch(setTargetLang(sourceLanguage));
-              dispatch(setSourceLang(itemValue));
-            }
-          }}
+          onChange={setSourceLang}
           style={styles.picker}
         />
       </View>
@@ -53,26 +56,12 @@ const LanguageChangedBox = () => {
 
       <View style={styles.languageContainer}>
         <Dropdown
-          labelField={"name"}
-          valueField={"code"}
+          labelField="name"
+          valueField="code"
           data={Languages}
-          renderLeftIcon={(visible) => (
-            <Image
-              source={targetLanguage.img}
-              style={{ marginRight: 5 }}
-              width={24}
-              height={24}
-            />
-          )}
+          renderLeftIcon={renderTargetIcon}
           value={targetLanguage.code}
-          onChange={(itemValue) => {
-            if (itemValue.code !== sourceLanguage.code) {
-              dispatch(setTargetLang(itemValue));
-            } else {
-              dispatch(setSourceLang(targetLanguage));
-              dispatch(setTargetLang(itemValue));
-            }
-          }}
+          onChange={setTargetLang}
           style={styles.picker}
         />
       </View>
@@ -109,9 +98,6 @@ const styles = StyleSheet.create({
   },
   swapButton: {
     paddingHorizontal: 16,
-  },
-  swapText: {
-    fontSize: 24,
   },
 });
 
