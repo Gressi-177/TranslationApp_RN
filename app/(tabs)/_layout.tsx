@@ -3,7 +3,7 @@ import React from "react";
 
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { Colors } from "@/constants/Colors";
-import { View } from "react-native";
+import { Text, View } from "react-native";
 
 export default function TabLayout() {
   const colorScheme = "light";
@@ -65,7 +65,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="history"
         options={{
-          title: "History",
+          headerTitle: () => (
+            <Text className="text-lg font-bold text-white">History</Text>
+          ),
           headerStyle: {
             backgroundColor: Colors[colorScheme ?? "light"].headerBackground,
           },
@@ -80,7 +82,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="favorite"
         options={{
-          title: "Favorite",
+          headerTitle: () => (
+            <Text className="text-lg font-bold text-white">Favorite</Text>
+          ),
           headerStyle: {
             backgroundColor: Colors[colorScheme ?? "light"].headerBackground,
           },
