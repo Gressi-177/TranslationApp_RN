@@ -1,70 +1,281 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React, { useState, useEffect } from "react";
+import translate from "translate";
+import * as Speech from "expo-speech";
+import * as Clipboard from "expo-clipboard";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
+import { useSQLiteContext } from "expo-sqlite";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import Language from "@/models/Language";
+import DBProvider from "@/utils/database";
+import Translation from "@/models/Translation";
+import { Ionicons } from "@expo/vector-icons";
+import Languages from "@/constants/Languages";
+import LanguageChangedBox from "@/components/LanguageChangedBox";
+import { useAppSelector } from "@/features/hook";
 
-export default function HomeScreen() {
+const HomePage = ({
+  sourceText = "",
+  sourceLanguage = Languages[0],
+  targetLanguage = Languages[1],
+}: {
+  sourceText: string;
+  sourceLanguage: Language;
+  targetLanguage: Language;
+}) => {
+  const db = useSQLiteContext();
+
+  const [isTranslated, setIsTranslated] = useState(false);
+  const [prevLanguage, setPrevLanguage] = useState<string>();
+  const [translatedText, setTranslatedText] = useState("");
+  const [sourceInputText, setSourceInputText] = useState(sourceText);
+  const [currentTranslation, setCurrentTranslation] = useState<Translation>();
+
+  useEffect(() => {
+    translate.engine = "google";
+  }, []);
+
+  useEffect(() => {
+    setSourceInputText(sourceText);
+    translateText(sourceText);
+  }, [sourceText, sourceLanguage, targetLanguage]);
+
+  const translateText = async (text: string) => {
+    if (!text) return;
+
+    setIsTranslated(false);
+    const translation = await translate(text, {
+      from: sourceLanguage.code,
+      to: targetLanguage.code,
+    });
+
+    const result = await DBProvider.insertTranslation(db, {
+      source_text: sourceInputText,
+      source_language: sourceLanguage.code,
+      translated_text: translation,
+      target_language: targetLanguage.code,
+    });
+
+    const fetchedTranslation = await DBProvider.getTranslation(
+      db,
+      result.lastInsertRowId
+    );
+
+    if (fetchedTranslation) setCurrentTranslation(fetchedTranslation);
+
+    setTranslatedText(translation);
+    setIsTranslated(true);
+  };
+
+  const updateMarkTranslation = async () => {
+    if (!currentTranslation) return;
+
+    const result = await DBProvider.updateTranslation(db, {
+      ...currentTranslation,
+      is_marked: currentTranslation.is_marked,
+    });
+
+    if (!result) return;
+
+    if (result.lastInsertRowId > 0) {
+      setCurrentTranslation({
+        ...currentTranslation,
+        is_marked: currentTranslation.is_marked,
+      });
+    }
+  };
+
+  const voiceText = async (text: string, language: string) => {
+    const isSpeaking = await Speech.isSpeakingAsync();
+    if (isSpeaking) {
+      await Speech.stop();
+
+      if (prevLanguage === language) return;
+    }
+
+    setPrevLanguage(language);
+    Speech.speak(text, {
+      language: language,
+      pitch: 1.0,
+    });
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <ScrollView style={styles.container}>
+      <View>
+        <LanguageChangedBox />
+      </View>
+      <View style={styles.boxContainer}>
+        <View style={styles.header}>
+          <View style={styles.languageRow}>
+            <Text style={styles.languageText}>{sourceLanguage.name}</Text>
+            <TouchableOpacity
+              onPress={() =>
+                voiceText(sourceInputText, sourceLanguage.language)
+              }
+            >
+              <Ionicons name="volume-low-outline" size={24} color="#003366" />
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
+            onPress={() => {
+              if (sourceInputText) {
+                setSourceInputText("");
+              }
+              setIsTranslated(false);
+              setTranslatedText("");
+            }}
+          >
+            <Ionicons name="close" size={24} />
+          </TouchableOpacity>
+        </View>
+        <TextInput
+          style={styles.textInput}
+          multiline
+          numberOfLines={3}
+          placeholder="Enter text here..."
+          placeholderTextColor={"#bbbbbb"}
+          value={sourceInputText}
+          onChangeText={setSourceInputText}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        <View style={styles.footer}>
+          <TouchableOpacity
+            onPress={() => {
+              /* Handle STT here */
+            }}
+          >
+            <Ionicons name="mic-outline" size={24} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.translateButton}
+            onPress={() => translateText(sourceInputText)}
+          >
+            <Text style={styles.translateButtonText}>Translate</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      {isTranslated && (
+        <View style={styles.boxContainer}>
+          <View style={styles.header}>
+            <View style={styles.languageRow}>
+              <Text style={styles.languageText}>{targetLanguage.name}</Text>
+              <TouchableOpacity
+                onPress={() =>
+                  voiceText(translatedText, targetLanguage.language)
+                }
+              >
+                <Ionicons name="volume-low-outline" size={24} color="#003366" />
+              </TouchableOpacity>
+            </View>
+          </View>
+          <TextInput
+            style={styles.textInput}
+            multiline
+            placeholder="Enter text here..."
+            placeholderTextColor={"#bbbbbb"}
+            value={translatedText}
+            editable={false}
+          />
+          <View style={styles.iconActions}>
+            <TouchableOpacity
+              onPress={() => Clipboard.setStringAsync(translatedText)}
+            >
+              <Ionicons name="copy-outline" size={24} color="#003366" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={updateMarkTranslation}>
+              <Ionicons
+                name={
+                  currentTranslation && currentTranslation.is_marked
+                    ? "star"
+                    : "star-outline"
+                }
+                size={24}
+                color="#003366"
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+    </ScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: { padding: 16, backgroundColor: "#FFF" },
+  boxContainer: {
+    borderRadius: 12,
+    shadowColor: "rgba(0, 0, 0, 0.15)",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    elevation: 5,
+    marginTop: 16,
+    padding: 16,
+    backgroundColor: "rgba(255, 251, 254, 1)",
   },
-  stepContainer: {
-    gap: 8,
+  languageBox: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
+  languageRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  languageText: {
+    color: "rgba(0, 51, 102, 1)",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginRight: 8,
+  },
+  textInput: {
+    borderWidth: 0,
+    marginTop: 8,
+    marginBottom: 16,
+    padding: 8,
+    borderRadius: 8,
+    minHeight: 80,
+    color: "black",
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  inputBox: {
+    backgroundColor: "#FFF8FE",
+    padding: 16,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    marginBottom: 16,
+  },
+  translateButtonText: {
+    color: "white",
+    fontSize: 14,
+  },
+  translateButton: {
+    backgroundColor: "#FF6600",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 50,
+  },
+  buttonText: { color: "#FFF", fontSize: 14 },
+  iconActions: { flexDirection: "row", justifyContent: "flex-end", gap: 16 },
 });
+
+export default HomePage;
