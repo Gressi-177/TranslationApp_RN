@@ -3,7 +3,6 @@ import React from "react";
 
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import { View } from "react-native";
 
 export default function TabLayout() {
@@ -67,6 +66,9 @@ export default function TabLayout() {
         name="history"
         options={{
           title: "History",
+          headerStyle: {
+            backgroundColor: Colors[colorScheme ?? "light"].headerBackground,
+          },
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
               name={focused ? "time" : "time-outline"}

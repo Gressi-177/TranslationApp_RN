@@ -13,6 +13,7 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import DBProvider from "@/utils/database";
 import { SQLiteProvider } from "expo-sqlite";
 
+import "../global.css";
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
