@@ -81,6 +81,9 @@ export default function TabLayout() {
         name="favorite"
         options={{
           title: "Favorite",
+          headerStyle: {
+            backgroundColor: Colors[colorScheme ?? "light"].headerBackground,
+          },
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
               name={focused ? "star" : "star-outline"}

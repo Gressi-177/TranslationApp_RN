@@ -71,8 +71,8 @@ const DBProvider = {
        SET source_text = ?, 
            source_language = ?, 
            translated_text = ?, 
-           is_marked = ?, 
-           target_language = ? 
+           target_language = ? ,
+           is_marked = ?
        WHERE id = ?`,
       [
         translationData.source_text,
