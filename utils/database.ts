@@ -94,13 +94,7 @@ const DBProvider = {
   },
 
   deleteAllTranslations: async (db: SQLite.SQLiteDatabase) => {
-    await db.runAsync("DELETE * FROM translations WHERE is_marked = ?", 0);
-
-    await db.runAsync(
-      "UPDATE translations SET is_deleted = ? WHERE is_marked = ?",
-      1,
-      1
-    );
+    await db.runAsync("UPDATE translations SET is_deleted = ?", [1]);
   },
 };
 

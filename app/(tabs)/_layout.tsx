@@ -3,10 +3,18 @@ import React from "react";
 
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { Colors } from "@/constants/Colors";
-import { Text, View } from "react-native";
-
+import DBProvider from "@/utils/database";
+import { useSQLiteContext } from "expo-sqlite";
+import { Text, TouchableOpacity, View } from "react-native";
+import { EventRegister } from "react-native-event-listeners";
 export default function TabLayout() {
   const colorScheme = "light";
+
+  const db = useSQLiteContext();
+  const handleClearAll = async () => {
+    await DBProvider.deleteAllTranslations(db);
+    EventRegister.emit("clearAll");
+  };
 
   return (
     <Tabs
@@ -67,6 +75,11 @@ export default function TabLayout() {
         options={{
           headerTitle: () => (
             <Text className="text-lg font-bold text-white">History</Text>
+          ),
+          headerRight: () => (
+            <TouchableOpacity onPress={handleClearAll}>
+              <Text className="text-white text-base">Clear all</Text>
+            </TouchableOpacity>
           ),
           headerStyle: {
             backgroundColor: Colors[colorScheme ?? "light"].headerBackground,
