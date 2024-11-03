@@ -35,7 +35,12 @@ const LanguageChangedBox = () => {
         renderLeftIcon={renderSourceIcon}
         value={sourceLanguage.code}
         onChange={setSourceLang}
-        style={{ flexGrow: 1 }}
+        style={{
+          flexGrow: 1,
+          paddingBottom: 2,
+          borderBottomColor: "rgba(189, 189, 189, 1)",
+          borderBottomWidth: 1,
+        }}
       />
 
       <TouchableOpacity onPress={swapLanguages} className="px-4">
@@ -49,7 +54,12 @@ const LanguageChangedBox = () => {
         renderLeftIcon={renderTargetIcon}
         value={targetLanguage.code}
         onChange={setTargetLang}
-        style={{ flexGrow: 1 }}
+        style={{
+          flexGrow: 1,
+          paddingBottom: 2,
+          borderBottomColor: "rgba(189, 189, 189, 1)",
+          borderBottomWidth: 1,
+        }}
       />
     </View>
   );
