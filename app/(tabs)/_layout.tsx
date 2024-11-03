@@ -28,7 +28,11 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Translation App",
+          headerTitle: () => (
+            <Text className="text-lg font-bold text-white">
+              Translation App
+            </Text>
+          ),
           headerStyle: {
             backgroundColor: Colors[colorScheme ?? "light"].headerBackground,
           },
@@ -78,7 +82,7 @@ export default function TabLayout() {
           ),
           headerRight: () => (
             <TouchableOpacity onPress={handleClearAll}>
-              <Text className="text-white text-base">Clear all</Text>
+              <Text className="text-white text-base mr-5">Clear all</Text>
             </TouchableOpacity>
           ),
           headerStyle: {
