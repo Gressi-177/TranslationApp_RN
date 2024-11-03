@@ -44,7 +44,12 @@ export default function TabLayout() {
       <Tabs.Screen
         name="camera"
         options={{
-          title: "Camera",
+          headerTitle: () => (
+            <Text className="text-lg font-bold text-white">Camera</Text>
+          ),
+          headerStyle: {
+            backgroundColor: Colors[colorScheme ?? "light"].headerBackground,
+          },
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
               name={focused ? "camera" : "camera-outline"}

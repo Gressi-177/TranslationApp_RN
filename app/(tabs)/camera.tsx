@@ -1,124 +1,102 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { StyleSheet, Image, Platform } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { View, TouchableOpacity, Image, Text, Button } from "react-native";
+import { CameraView, useCameraPermissions } from "expo-camera";
+import * as ImagePicker from "expo-image-picker";
+import LanguageChangedBox from "@/components/LanguageChangedBox";
+import { Ionicons } from "@expo/vector-icons";
 
-import { Collapsible } from "@/components/Collapsible";
-import { ExternalLink } from "@/components/ExternalLink";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
+const CameraPage = () => {
+  const cameraRef = useRef<CameraView>(null);
+  const [isFlashOn, setIsFlashOn] = useState(false);
+  const [permission, requestPermission] = useCameraPermissions();
 
-export default function TabCameraScreen() {
+  useEffect(() => {}, []);
+
+  const toggleFlash = () => {
+    setIsFlashOn((prev) => !prev);
+  };
+
+  const recognizeText = async (uri: string) => {
+    // Implement text recognition logic using a suitable library
+    // Example: using Google ML Kit or another OCR library
+    // Call navigateToHome with recognized text, sourceLanguage, and targetLanguage
+  };
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (result.assets && result.assets.length > 0) {
+      recognizeText(result.assets[0].uri);
+    }
+  };
+
+  const takePicture = async () => {
+    if (cameraRef.current) {
+      const options = { quality: 0.5, base64: true, fixOrientation: true };
+      const data = await cameraRef.current.takePictureAsync(options);
+
+      if (!data) return;
+      recognizeText(data.uri);
+    }
+  };
+
+  if (!permission) {
+    return <View />;
+  }
+
+  if (!permission.granted) {
+    return (
+      <View className="flex flex-1 justify-center">
+        <Text className="text-center pb-2.5">
+          We need your permission to show the camera
+        </Text>
+        <Button onPress={requestPermission} title="grant permission" />
+      </View>
+    );
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
-      headerImage={
-        <Ionicons size={310} name="code-slash" style={styles.headerImage} />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>
-        This app includes example code to help you get started.
-      </ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{" "}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText>{" "}
-          and{" "}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in{" "}
-          <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{" "}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the
-          web version, press <ThemedText type="defaultSemiBold">w</ThemedText>{" "}
-          in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the{" "}
-          <ThemedText type="defaultSemiBold">@2x</ThemedText> and{" "}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to
-          provide files for different screen densities
-        </ThemedText>
-        <Image
-          source={require("@/assets/images/react-logo.png")}
-          style={{ alignSelf: "center" }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText>{" "}
-          to see how to load{" "}
-          <ThemedText style={{ fontFamily: "SpaceMono" }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{" "}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook
-          lets you inspect what the user's current color scheme is, and so you
-          can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{" "}
-          <ThemedText type="defaultSemiBold">
-            components/HelloWave.tsx
-          </ThemedText>{" "}
-          component uses the powerful{" "}
-          <ThemedText type="defaultSemiBold">
-            react-native-reanimated
-          </ThemedText>{" "}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The{" "}
-              <ThemedText type="defaultSemiBold">
-                components/ParallaxScrollView.tsx
-              </ThemedText>{" "}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
-  );
-}
+    <View className="flex-1">
+      <CameraView
+        ref={cameraRef}
+        className="flex-1"
+        style={{ flex: 1 }}
+        facing="front"
+        mode="picture"
+        flash={isFlashOn ? "on" : "off"}
+      >
+        <View className="absolute top-8 left-4 right-4">
+          <LanguageChangedBox />
+        </View>
 
-const styles = StyleSheet.create({
-  headerImage: {
-    color: "#808080",
-    bottom: -90,
-    left: -35,
-    position: "absolute",
-  },
-  titleContainer: {
-    flexDirection: "row",
-    gap: 8,
-  },
-});
+        <View className="absolute bottom-8 left-0 right-0 flex flex-row justify-around items-center">
+          <TouchableOpacity onPress={pickImage} className="p-2">
+            <Image
+              source={require("@/assets/images/placeholder.jpg")}
+              className="w-10 h-10 rounded-md"
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={takePicture}>
+            <View className="w-20 h-20 border-4 border-white rounded-full flex items-center justify-center bg-blue-900"></View>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={toggleFlash} className="p-2">
+            <Ionicons
+              name={isFlashOn ? "flash" : "flash-off"}
+              size={28}
+              color="white"
+            />
+          </TouchableOpacity>
+        </View>
+      </CameraView>
+    </View>
+  );
+};
+
+export default CameraPage;
