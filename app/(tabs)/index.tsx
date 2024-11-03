@@ -1,47 +1,41 @@
-import * as Clipboard from "expo-clipboard";
-import * as Speech from "expo-speech";
-import { useSQLiteContext } from "expo-sqlite";
 import React, { useEffect, useState } from "react";
 import {
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import translate from "translate";
+import * as Speech from "expo-speech";
+import * as Clipboard from "expo-clipboard";
+import { useSQLiteContext } from "expo-sqlite";
 
-import LanguageChangedBox from "@/components/LanguageChangedBox";
-import Languages from "@/constants/Languages";
-import Language from "@/models/Language";
-import Translation from "@/models/Translation";
 import DBProvider from "@/utils/database";
+import Translation from "@/models/Translation";
+import useStoreGlobal from "@/stores/useStoreGlobal";
+import LanguageChangedBox from "@/components/LanguageChangedBox";
 import { Ionicons } from "@expo/vector-icons";
 
-const HomePage = ({
-  sourceText = "",
-  sourceLanguage = Languages[0],
-  targetLanguage = Languages[1],
-}: {
-  sourceText: string;
-  sourceLanguage: Language;
-  targetLanguage: Language;
-}) => {
+const HomePage = () => {
   const db = useSQLiteContext();
 
   const [isTranslated, setIsTranslated] = useState(false);
   const [prevLanguage, setPrevLanguage] = useState<string>();
   const [translatedText, setTranslatedText] = useState("");
-  const [sourceInputText, setSourceInputText] = useState(sourceText);
   const [currentTranslation, setCurrentTranslation] = useState<Translation>();
+
+  const sourceText = useStoreGlobal((state) => state.sourceText);
+  const sourceLanguage = useStoreGlobal((state) => state.sourceLang);
+  const targetLanguage = useStoreGlobal((state) => state.targetLang);
+  const setSourceText = useStoreGlobal((state) => state.setSourceText);
 
   useEffect(() => {
     translate.engine = "google";
   }, []);
 
   useEffect(() => {
-    setSourceInputText(sourceText);
+    setSourceText(sourceText);
     translateText(sourceText);
   }, [sourceText, sourceLanguage, targetLanguage]);
 
@@ -55,7 +49,7 @@ const HomePage = ({
     });
 
     const result = await DBProvider.insertTranslation(db, {
-      source_text: sourceInputText,
+      source_text: sourceText,
       source_language: sourceLanguage.code,
       translated_text: translation,
       target_language: targetLanguage.code,
@@ -105,27 +99,27 @@ const HomePage = ({
     });
   };
 
+  const openVoice = () => {};
+
   return (
-    <ScrollView style={styles.container}>
-      <View>
-        <LanguageChangedBox />
-      </View>
-      <View style={styles.boxContainer}>
-        <View style={styles.header}>
-          <View style={styles.languageRow}>
-            <Text style={styles.languageText}>{sourceLanguage.name}</Text>
+    <ScrollView className="p-4 bg-white">
+      <LanguageChangedBox />
+      <View className="rounded-lg mt-4 p-4 bg-[rgba(255,251,254,1)] shadow-lg">
+        <View className="flex flex-row justify-between items-center">
+          <View className="flex flex-row items-center">
+            <Text className="text-[#003366] text-[16px] font-bold mr-2">
+              {sourceLanguage.name}
+            </Text>
             <TouchableOpacity
-              onPress={() =>
-                voiceText(sourceInputText, sourceLanguage.language)
-              }
+              onPress={() => voiceText(sourceText, sourceLanguage.language)}
             >
               <Ionicons name="volume-low-outline" size={24} color="#003366" />
             </TouchableOpacity>
           </View>
           <TouchableOpacity
             onPress={() => {
-              if (sourceInputText) {
-                setSourceInputText("");
+              if (sourceText) {
+                setSourceText("");
               }
               setIsTranslated(false);
               setTranslatedText("");
@@ -135,35 +129,38 @@ const HomePage = ({
           </TouchableOpacity>
         </View>
         <TextInput
-          style={styles.textInput}
+          className="border-0 mt-2 mb-4 p-2 rounded-lg min-h-[80px] text-black"
           multiline
           numberOfLines={3}
           placeholder="Enter text here..."
           placeholderTextColor={"#bbbbbb"}
-          value={sourceInputText}
-          onChangeText={setSourceInputText}
+          value={sourceText}
+          onChangeText={setSourceText}
         />
-        <View style={styles.footer}>
+        <View className="flex flex-row justify-between items-center">
           <TouchableOpacity
+            className="bg-[#003366] p-2 rounded-full"
             onPress={() => {
               /* Handle STT here */
             }}
           >
-            <Ionicons name="mic-outline" size={24} />
+            <Ionicons name="mic" size={22} color={"white"} />
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.translateButton}
-            onPress={() => translateText(sourceInputText)}
+            className="bg-[#FF6600] py-2 px-4 rounded-full"
+            onPress={() => translateText(sourceText)}
           >
-            <Text style={styles.translateButtonText}>Translate</Text>
+            <Text className="text-white text-[14px]">Translate</Text>
           </TouchableOpacity>
         </View>
       </View>
       {isTranslated && (
-        <View style={styles.boxContainer}>
-          <View style={styles.header}>
-            <View style={styles.languageRow}>
-              <Text style={styles.languageText}>{targetLanguage.name}</Text>
+        <View className="rounded-lg mt-4 p-4 bg-[rgba(255,251,254,1)] shadow-lg">
+          <View className="flex flex-row justify-between items-center">
+            <View className="flex flex-row items-center">
+              <Text className="text-[#003366] text-[16px] font-bold mr-2">
+                {targetLanguage.name}
+              </Text>
               <TouchableOpacity
                 onPress={() =>
                   voiceText(translatedText, targetLanguage.language)
@@ -174,14 +171,14 @@ const HomePage = ({
             </View>
           </View>
           <TextInput
-            style={styles.textInput}
+            className="border-0 mt-2 mb-4 p-2 rounded-lg min-h-[80px] text-black"
             multiline
             placeholder="Enter text here..."
             placeholderTextColor={"#bbbbbb"}
             value={translatedText}
             editable={false}
           />
-          <View style={styles.iconActions}>
+          <View className="flex flex-row justify-end space-x-4 gap-4">
             <TouchableOpacity
               onPress={() => Clipboard.setStringAsync(translatedText)}
             >
@@ -204,77 +201,5 @@ const HomePage = ({
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { padding: 16, backgroundColor: "#FFF" },
-  boxContainer: {
-    borderRadius: 12,
-    shadowColor: "rgba(0, 0, 0, 0.15)",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 1,
-    shadowRadius: 3,
-    elevation: 5,
-    marginTop: 16,
-    padding: 16,
-    backgroundColor: "rgba(255, 251, 254, 1)",
-  },
-  languageBox: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  languageRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  languageText: {
-    color: "rgba(0, 51, 102, 1)",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginRight: 8,
-  },
-  textInput: {
-    borderWidth: 0,
-    marginTop: 8,
-    marginBottom: 16,
-    padding: 8,
-    borderRadius: 8,
-    minHeight: 80,
-    color: "black",
-  },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-
-  inputBox: {
-    backgroundColor: "#FFF8FE",
-    padding: 16,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
-    marginBottom: 16,
-  },
-  translateButtonText: {
-    color: "white",
-    fontSize: 14,
-  },
-  translateButton: {
-    backgroundColor: "#FF6600",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 50,
-  },
-  buttonText: { color: "#FFF", fontSize: 14 },
-  iconActions: { flexDirection: "row", justifyContent: "flex-end", gap: 16 },
-});
 
 export default HomePage;

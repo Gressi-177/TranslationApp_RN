@@ -1,9 +1,10 @@
+import React, { useCallback } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { Dropdown } from "react-native-element-dropdown";
+import { Image, TouchableOpacity, View } from "react-native";
+
 import Languages from "@/constants/Languages";
 import useStoreGlobal from "@/stores/useStoreGlobal";
-import { Ionicons } from "@expo/vector-icons";
-import React, { useCallback } from "react";
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
-import { Dropdown } from "react-native-element-dropdown";
 
 const LanguageChangedBox = () => {
   const sourceLanguage = useStoreGlobal((state) => state.sourceLang);
@@ -13,92 +14,45 @@ const LanguageChangedBox = () => {
   const swapLanguages = useStoreGlobal((state) => state.swapLanguages);
 
   const renderSourceIcon = useCallback(
-    () => (
-      <Image
-        source={sourceLanguage.img}
-        style={styles.flagImage}
-        width={24}
-        height={24}
-      />
-    ),
+    () => <Image source={sourceLanguage.img} className="w-6 h-6 mr-2" />,
     [sourceLanguage.img]
   );
 
   const renderTargetIcon = useCallback(
-    () => (
-      <Image
-        source={targetLanguage.img}
-        style={styles.flagImage}
-        width={24}
-        height={24}
-      />
-    ),
+    () => <Image source={targetLanguage.img} className="w-6 h-6 mr-2" />,
     [targetLanguage.img]
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.languageContainer}>
-        <Dropdown
-          labelField="name"
-          valueField="code"
-          data={Languages}
-          renderLeftIcon={renderSourceIcon}
-          value={sourceLanguage.code}
-          onChange={setSourceLang}
-          style={styles.picker}
-        />
-      </View>
+    <View
+      className="flex flex-row items-center p-4 bg-[#FFFBFE] rounded-full shadow-md shadow-black/15"
+      style={{ elevation: 3 }}
+    >
+      <Dropdown
+        labelField="name"
+        valueField="code"
+        data={Languages}
+        renderLeftIcon={renderSourceIcon}
+        value={sourceLanguage.code}
+        onChange={setSourceLang}
+        style={{ flexGrow: 1 }}
+      />
 
-      <TouchableOpacity onPress={swapLanguages} style={styles.swapButton}>
+      <TouchableOpacity onPress={swapLanguages} className="px-4">
         <Ionicons name="swap-horizontal-outline" size={24} />
       </TouchableOpacity>
 
-      <View style={styles.languageContainer}>
-        <Dropdown
-          labelField="name"
-          valueField="code"
-          data={Languages}
-          renderLeftIcon={renderTargetIcon}
-          value={targetLanguage.code}
-          onChange={setTargetLang}
-          style={styles.picker}
-        />
-      </View>
+      <Dropdown
+        labelField="name"
+        valueField="code"
+        data={Languages}
+        renderLeftIcon={renderTargetIcon}
+        value={targetLanguage.code}
+        onChange={setTargetLang}
+        style={{ flexGrow: 1 }}
+      />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-    backgroundColor: "#FFFBFE",
-    borderRadius: 50,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  languageContainer: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  flagImage: {
-    width: 24,
-    height: 24,
-    marginRight: 8,
-  },
-  picker: {
-    flex: 1,
-    height: "auto",
-  },
-  swapButton: {
-    paddingHorizontal: 16,
-  },
-});
 
 export default LanguageChangedBox;
