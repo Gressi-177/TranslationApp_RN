@@ -1,25 +1,30 @@
-import React, { useEffect, useRef, useState } from "react";
-import { View, TouchableOpacity, Image, Text, Button } from "react-native";
-import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
-import LanguageChangedBox from "@/components/LanguageChangedBox";
+import TextRecognition from "@react-native-ml-kit/text-recognition";
+import React, { useEffect, useRef, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import { CameraView, useCameraPermissions } from "expo-camera";
+import { View, TouchableOpacity, Image, Text, Button } from "react-native";
+
+import LanguageChangedBox from "@/components/LanguageChangedBox";
+import useStoreGlobal from "@/stores/useStoreGlobal";
 
 const CameraPage = () => {
   const cameraRef = useRef<CameraView>(null);
   const [isFlashOn, setIsFlashOn] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
 
-  useEffect(() => {}, []);
+  const setSourceText = useStoreGlobal((state) => state.setSourceText);
 
   const toggleFlash = () => {
     setIsFlashOn((prev) => !prev);
   };
 
   const recognizeText = async (uri: string) => {
-    // Implement text recognition logic using a suitable library
-    // Example: using Google ML Kit or another OCR library
-    // Call navigateToHome with recognized text, sourceLanguage, and targetLanguage
+    const result = await TextRecognition.recognize(uri);
+
+    console.log(result.text);
+
+    setSourceText(result.text);
   };
 
   const pickImage = async () => {
@@ -66,15 +71,15 @@ const CameraPage = () => {
         ref={cameraRef}
         className="flex-1"
         style={{ flex: 1 }}
-        facing="front"
+        facing="back"
         mode="picture"
         flash={isFlashOn ? "on" : "off"}
       >
-        <View className="absolute top-8 left-4 right-4">
+        <View className="absolute top-0 left-4 right-4">
           <LanguageChangedBox />
         </View>
 
-        <View className="absolute bottom-8 left-0 right-0 flex flex-row justify-around items-center">
+        <View className="absolute bottom-2 left-0 right-0 flex flex-row justify-around items-center">
           <TouchableOpacity onPress={pickImage} className="p-2">
             <Image
               source={require("@/assets/images/placeholder.jpg")}
