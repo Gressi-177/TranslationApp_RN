@@ -87,8 +87,8 @@ const DBProvider = {
 
   getFavorites: async (db: SQLite.SQLiteDatabase) => {
     return await db.getAllAsync<Translation>(
-      "SELECT * FROM translations WHERE is_deleted = ? AND is_marked = ? order by created_at desc",
-      0,
+      "SELECT * FROM translations WHERE is_marked = ? order by created_at desc",
+
       1
     );
   },

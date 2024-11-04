@@ -1,3 +1,6 @@
+import * as Clipboard from "expo-clipboard";
+import * as Speech from "expo-speech";
+import { useSQLiteContext } from "expo-sqlite";
 import React, { useEffect, useState } from "react";
 import {
   ScrollView,
@@ -7,14 +10,12 @@ import {
   View,
 } from "react-native";
 import translate from "translate";
-import * as Speech from "expo-speech";
-import * as Clipboard from "expo-clipboard";
-import { useSQLiteContext } from "expo-sqlite";
 
-import DBProvider from "@/utils/database";
+import LanguageChangedBox from "@/components/LanguageChangedBox";
+import SpeechToText from "@/components/SpeechToText";
 import Translation from "@/models/Translation";
 import useStoreGlobal from "@/stores/useStoreGlobal";
-import LanguageChangedBox from "@/components/LanguageChangedBox";
+import DBProvider from "@/utils/database";
 import { Ionicons } from "@expo/vector-icons";
 
 const HomePage = () => {
@@ -198,6 +199,7 @@ const HomePage = () => {
           </View>
         </View>
       )}
+      <SpeechToText />
     </ScrollView>
   );
 };
