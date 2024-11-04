@@ -24,43 +24,45 @@ const LanguageChangedBox = () => {
   );
 
   return (
-    <View
-      className="flex flex-row items-center p-4 bg-[#FFFBFE] rounded-full shadow-md shadow-black/15"
-      style={{ elevation: 3 }}
-    >
-      <Dropdown
-        labelField="name"
-        valueField="code"
-        data={Languages}
-        renderLeftIcon={renderSourceIcon}
-        value={sourceLanguage.code}
-        onChange={setSourceLang}
-        style={{
-          flexGrow: 1,
-          paddingBottom: 2,
-          borderBottomColor: "rgba(189, 189, 189, 1)",
-          borderBottomWidth: 1,
-        }}
-      />
+    <View className="mt-4 p-4 bg-[rgba(255,251,254,1)] shadow-lg rounded-full shadow-black/15">
+      <View
+        className="flex flex-row items-center p-4 shadow-md "
+        style={{ elevation: 3 }}
+      >
+        <Dropdown
+          labelField="name"
+          valueField="code"
+          data={Languages}
+          renderLeftIcon={renderSourceIcon}
+          value={sourceLanguage.code}
+          onChange={setSourceLang}
+          style={{
+            flexGrow: 1,
+            paddingBottom: 2,
+            borderBottomColor: "rgba(189, 189, 189, 1)",
+            borderBottomWidth: 1,
+          }}
+        />
 
-      <TouchableOpacity onPress={swapLanguages} className="px-4">
-        <Ionicons name="swap-horizontal-outline" size={24} />
-      </TouchableOpacity>
+        <TouchableOpacity onPress={swapLanguages} className="px-4">
+          <Ionicons name="swap-horizontal-outline" size={24} />
+        </TouchableOpacity>
 
-      <Dropdown
-        labelField="name"
-        valueField="code"
-        data={Languages}
-        renderLeftIcon={renderTargetIcon}
-        value={targetLanguage.code}
-        onChange={setTargetLang}
-        style={{
-          flexGrow: 1,
-          paddingBottom: 2,
-          borderBottomColor: "rgba(189, 189, 189, 1)",
-          borderBottomWidth: 1,
-        }}
-      />
+        <Dropdown
+          labelField="name"
+          valueField="code"
+          data={Languages}
+          renderLeftIcon={renderTargetIcon}
+          value={targetLanguage.code}
+          onChange={setTargetLang}
+          style={{
+            flexGrow: 1,
+            paddingBottom: 2,
+            borderBottomColor: "rgba(189, 189, 189, 1)",
+            borderBottomWidth: 1,
+          }}
+        />
+      </View>
     </View>
   );
 };

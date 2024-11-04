@@ -72,7 +72,7 @@ const HomePage = () => {
 
     const result = await DBProvider.updateTranslation(db, {
       ...currentTranslation,
-      is_marked: currentTranslation.is_marked,
+      is_marked: !currentTranslation.is_marked,
     });
 
     if (!result) return;
@@ -80,13 +80,14 @@ const HomePage = () => {
     if (result.lastInsertRowId > 0) {
       setCurrentTranslation({
         ...currentTranslation,
-        is_marked: currentTranslation.is_marked,
+        is_marked: !currentTranslation.is_marked,
       });
     }
   };
 
   const voiceText = async (text: string, language: string) => {
     const isSpeaking = await Speech.isSpeakingAsync();
+
     if (isSpeaking) {
       await Speech.stop();
 
