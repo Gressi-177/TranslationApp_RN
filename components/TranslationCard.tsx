@@ -10,7 +10,6 @@ export default function TranslationCard({
   handleFavoriteClick,
 }: TranslationCard) {
   const {
-    id,
     is_marked,
     source_language,
     source_text,
@@ -30,7 +29,7 @@ export default function TranslationCard({
       </View>
       <TouchableOpacity
         onPress={() => handleFavoriteClick(translation)}
-        className="absolute top-[6px] right-3"
+        className="absolute top-[6px] right-2"
       >
         {is_marked ? (
           <FontAwesome name="star" size={20} color="black" />
