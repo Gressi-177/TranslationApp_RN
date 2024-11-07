@@ -1,8 +1,8 @@
-import TranslationCard from "@/components/TranslationCard";
 import Translation from "@/models/Translation";
 import DBProvider from "@/utils/database";
 import { EventRegister } from "react-native-event-listeners";
 
+import TranslationCard from "@/components/TranslationCard";
 import { useIsFocused } from "@react-navigation/native";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
@@ -31,11 +31,7 @@ export default function TabTwoScreen() {
 
   useEffect(() => {
     EventRegister.addEventListener("clearAll", async () => {
-      try {
-        await fetchHistory(); // Gọi hàm bất đồng bộ
-      } catch (error) {
-        console.error("Error fetching history: ", error); // Xử lý lỗi
-      }
+      if (isFocused) await fetchHistory();
     });
     return () => {
       EventRegister.removeEventListener("clearAll");
