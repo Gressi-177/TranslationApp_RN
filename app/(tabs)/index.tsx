@@ -35,10 +35,10 @@ const HomePage = () => {
     translate.engine = "google";
   }, []);
 
-  useEffect(() => {
-    setSourceText(sourceText);
-    translateText(sourceText);
-  }, [sourceText, sourceLanguage, targetLanguage]);
+  // useEffect(() => {
+  //   setSourceText(sourceText);
+  //   translateText(sourceText);
+  // }, [sourceText, sourceLanguage, targetLanguage]);
 
   const translateText = async (text: string) => {
     if (!text) return;
@@ -104,7 +104,7 @@ const HomePage = () => {
   const openVoice = () => {};
 
   return (
-    <ScrollView className="p-4 bg-white">
+    <ScrollView className="p-4 ">
       <LanguageChangedBox />
       <View className="rounded-lg mt-4 p-4 bg-[rgba(255,251,254,1)] shadow-lg">
         <View className="flex flex-row justify-between items-center">
