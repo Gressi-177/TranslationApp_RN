@@ -1,14 +1,42 @@
 import { Tabs } from "expo-router";
-import React from "react";
+import { router } from "expo-router";
+import React, { useEffect, useState } from "react";
 
-import { TabBarIcon } from "@/components/navigation/TabBarIcon";
-import { Colors } from "@/constants/Colors";
 import DBProvider from "@/utils/database";
-import { useSQLiteContext } from "expo-sqlite";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Colors } from "@/constants/Colors";
+import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { EventRegister } from "react-native-event-listeners";
+import { useSQLiteContext } from "expo-sqlite";
+import {
+  AppState,
+  AppStateStatus,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import ReactMotion from "@/components/ReactMotion";
+
 export default function TabLayout() {
+  // const [appState, setAppState] = useState(AppState.currentState);
   const colorScheme = "light";
+
+  // useEffect(() => {
+  //   const handleAppStateChange = (nextAppState: AppStateStatus) => {
+  //     if (appState === "active" && nextAppState.match(/inactive|background/)) {
+  //       return <ReactMotion />;
+  //     }
+  //     setAppState(nextAppState);
+  //   };
+
+  //   const subscription = AppState.addEventListener(
+  //     "change",
+  //     handleAppStateChange
+  //   );
+
+  //   return () => {
+  //     subscription.remove();
+  //   };
+  // }, [appState]);
 
   const db = useSQLiteContext();
   const handleClearAll = async () => {
@@ -25,7 +53,7 @@ export default function TabLayout() {
         },
       }}
     >
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="index"
         options={{
           headerTitle: () => (
@@ -40,7 +68,7 @@ export default function TabLayout() {
             <TabBarIcon name={focused ? "mic" : "mic-outline"} color={color} />
           ),
         }}
-      />
+      /> */}
       <Tabs.Screen
         name="camera"
         options={{
@@ -59,14 +87,37 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="bubbles"
+        name="conversation"
         options={{
-          title: undefined,
+          headerTitle: () => (
+            <Text className="text-lg font-bold text-white">
+              Voice conversation
+            </Text>
+          ),
+          headerStyle: {
+            backgroundColor: Colors[colorScheme ?? "light"].headerBackground,
+          },
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? "mic" : "mic-outline"} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="index"
+        options={{
+          headerTitle: () => (
+            <Text className="text-lg font-bold text-white">
+              Translation App
+            </Text>
+          ),
+          headerStyle: {
+            backgroundColor: Colors[colorScheme ?? "light"].headerBackground,
+          },
           tabBarLabel: () => null,
           tabBarIcon: ({ color, focused }) => (
             <View
               style={{
-                backgroundColor: "rgba(33, 150, 243, 1)",
+                backgroundColor: "#2196f3",
                 padding: 10,
                 borderRadius: 100,
               }}
