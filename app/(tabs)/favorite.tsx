@@ -10,30 +10,21 @@ export default function TabTwoScreen() {
   const db = useSQLiteContext();
   const isFocused = useIsFocused();
   const [translations, setTranslations] = useState<Translation[]>([]);
+
   const fetchFavourite = async () => {
     const result = await DBProvider.getFavorites(db);
     setTranslations(result);
   };
-  const handleFavoriteClick = async (translation: Translation) => {
-    await DBProvider.updateTranslation(db, {
-      ...translation,
-      is_marked: !translation.is_marked,
-    });
 
-    await fetchFavourite();
-  };
   useEffect(() => {
     if (isFocused) fetchFavourite();
   }, [isFocused]);
+
   return (
     <ScrollView>
       <View className="p-5 flex flex-col gap-4">
         {translations?.map((translation) => (
-          <TranslationCard
-            key={translation.id}
-            translation={translation}
-            handleFavoriteClick={handleFavoriteClick}
-          />
+          <TranslationCard key={translation.id} translation={translation} />
         ))}
       </View>
     </ScrollView>

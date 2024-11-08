@@ -1,23 +1,42 @@
 import Translation from "@/models/Translation";
+import DBProvider from "@/utils/database";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useSQLiteContext } from "expo-sqlite";
+import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 interface TranslationCard {
   translation: Translation;
-  handleFavoriteClick: (translation: Translation) => void;
   className?: string;
 }
 export default function TranslationCard({
   translation,
-  handleFavoriteClick,
   className,
 }: TranslationCard) {
+  const db = useSQLiteContext();
+  const [translationTemp, setTranslationTemp] = useState(translation);
   const {
     is_marked,
     source_language,
     source_text,
     target_language,
     translated_text,
-  } = translation;
+  } = translationTemp;
+
+  const handleFavoriteClick = async () => {
+    const changes = (
+      await DBProvider.updateTranslation(db, {
+        ...translationTemp,
+        is_marked: !translationTemp.is_marked,
+      })
+    )?.changes;
+
+    if (changes)
+      setTranslationTemp((prev) => ({
+        ...prev,
+        is_marked: !prev.is_marked,
+      }));
+  };
+
   return (
     <View className={className}>
       <View className="relative px-7 py-4 bg-white rounded-xl shadow-sm gap-2">
@@ -31,7 +50,7 @@ export default function TranslationCard({
           <Text className="ml-4 text-[#060]">{translated_text}</Text>
         </View>
         <TouchableOpacity
-          onPress={() => handleFavoriteClick(translation)}
+          onPress={() => handleFavoriteClick()}
           className="absolute top-[6px] right-2"
         >
           {is_marked ? (

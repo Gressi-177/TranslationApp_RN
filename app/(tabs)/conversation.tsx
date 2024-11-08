@@ -24,7 +24,7 @@ const ConversationPage = () => {
     const fetchVoiceTranslations = async () => {
       const defVoiceTranslations = await DBProvider.getTranslations(db);
 
-      setVoiceTranslations(defVoiceTranslations);
+      setVoiceTranslations(defVoiceTranslations.reverse());
     };
 
     fetchVoiceTranslations();
@@ -36,15 +36,8 @@ const ConversationPage = () => {
     }
   }, [voiceTranslations]);
 
-  const handleFavoriteClick = async (translation: Translation) => {
-    await DBProvider.updateTranslation(db, {
-      ...translation,
-      is_marked: !translation.is_marked,
-    });
-  };
-
   return (
-    <View className="flex-1 relative ">
+    <View className="flex-1 relative">
       <ScrollView ref={scrollViewRef} className="p-4 pb-0 h-full mb-4">
         <View>
           {voiceTranslations?.map((t, index) => (
@@ -56,14 +49,13 @@ const ConversationPage = () => {
             >
               <TranslationCard
                 translation={t}
-                handleFavoriteClick={handleFavoriteClick}
                 className={index % 2 === 0 ? "self-start" : "self-end"}
               />
             </View>
           ))}
         </View>
       </ScrollView>
-      <View className="fixed bottom-0 left-0 right-0 p-2 pt-0 ">
+      <View className="fixed bottom-0 left-0 right-0 p-2 pt-0">
         <VoiceLanguageBox />
       </View>
     </View>
