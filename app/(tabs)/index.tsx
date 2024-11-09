@@ -12,12 +12,11 @@ import {
 import translate from "translate";
 
 import LanguageChangedBox from "@/components/LanguageChangedBox";
-import SpeechToText from "@/components/SpeechToText";
+import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import Translation from "@/models/Translation";
 import useStoreGlobal from "@/stores/useStoreGlobal";
 import DBProvider from "@/utils/database";
 import { Ionicons } from "@expo/vector-icons";
-import AudioRecord from "@/components/AudioRecord";
 
 const HomePage = () => {
   const db = useSQLiteContext();
@@ -32,14 +31,12 @@ const HomePage = () => {
   const targetLanguage = useStoreGlobal((state) => state.targetLang);
   const setSourceText = useStoreGlobal((state) => state.setSourceText);
 
+  const { isRecording, transcription, startRecording, stopRecording } =
+    useAudioRecorder();
+
   useEffect(() => {
     translate.engine = "google";
   }, []);
-
-  // useEffect(() => {
-  //   setSourceText(sourceText);
-  //   translateText(sourceText);
-  // }, [sourceText, sourceLanguage, targetLanguage]);
 
   const translateText = async (text: string) => {
     if (!text) return;
@@ -102,8 +99,6 @@ const HomePage = () => {
     });
   };
 
-  const openVoice = () => {};
-
   return (
     <ScrollView className="p-4 ">
       <LanguageChangedBox />
@@ -144,12 +139,22 @@ const HomePage = () => {
           <TouchableOpacity
             className="bg-[#003366] p-2 rounded-full"
             onPress={() => {
-              /* Handle STT here */
+              if (isRecording) {
+                stopRecording();
+                if (transcription) {
+                  setSourceText(transcription);
+                }
+              } else {
+                startRecording();
+              }
             }}
           >
-            <Ionicons name="mic" size={22} color={"white"} />
+            <Ionicons
+              name={isRecording ? "stop" : "mic"}
+              size={22}
+              color={"white"}
+            />
           </TouchableOpacity>
-          <AudioRecord />
           <TouchableOpacity
             className="bg-[#FF6600] py-2 px-4 rounded-full"
             onPress={() => translateText(sourceText)}
@@ -202,7 +207,6 @@ const HomePage = () => {
           </View>
         </View>
       )}
-      <SpeechToText />
     </ScrollView>
   );
 };
