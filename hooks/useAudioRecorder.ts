@@ -1,3 +1,4 @@
+import useStoreGlobal from "@/stores/useStoreGlobal";
 import { uriToBase64 } from "@/utils/base";
 import { Audio } from "expo-av";
 import { useEffect, useState } from "react";
@@ -17,7 +18,7 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [transcription, setTranscription] = useState<string>("");
   const [isPending, setIsPending] = useState(false);
-
+  const sourceLang = useStoreGlobal((state) => state.sourceLang);
   const resetRecording = () => {
     setRecording(null);
     setIsRecording(false);
@@ -64,13 +65,14 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
 
       if (uri) {
         const base64 = await uriToBase64(uri);
-        const response = await postAudio(base64);
+        console.log(sourceLang.code);
+        const response = await postAudio(base64, sourceLang.code);
         setTranscription(response?.transcription);
       }
     } catch (error) {
       console.error("Failed to stop recording:", error);
-    } finally {
       setTranscription("");
+    } finally {
       setIsPending(false);
       console.log("Recording stopped");
     }
