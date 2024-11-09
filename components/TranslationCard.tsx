@@ -1,17 +1,22 @@
-import Translation from "@/models/Translation";
-import DBProvider from "@/utils/database";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { useSQLiteContext } from "expo-sqlite";
 import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
+import { useSQLiteContext } from "expo-sqlite";
+import { useRoute } from "@react-navigation/native";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+
+import DBProvider from "@/utils/database";
+import Translation from "@/models/Translation";
 interface TranslationCard {
   translation: Translation;
   className?: string;
+  onUnFav?: (handleUndo: () => void) => void;
 }
 export default function TranslationCard({
   translation,
   className,
+  onUnFav,
 }: TranslationCard) {
+  const route = useRoute();
   const db = useSQLiteContext();
   const [translationTemp, setTranslationTemp] = useState(translation);
   const {
@@ -22,44 +27,59 @@ export default function TranslationCard({
     translated_text,
   } = translationTemp;
 
-  const handleFavoriteClick = async () => {
+  const handleFavoriteClick = async (curTranslation: Translation) => {
     const changes = (
       await DBProvider.updateTranslation(db, {
-        ...translationTemp,
-        is_marked: !translationTemp.is_marked,
+        ...curTranslation,
+        is_marked: !curTranslation.is_marked,
       })
     )?.changes;
 
-    if (changes)
-      setTranslationTemp((prev) => ({
-        ...prev,
-        is_marked: !prev.is_marked,
-      }));
+    if (!changes) return;
+
+    setTranslationTemp({
+      ...curTranslation,
+      is_marked: !curTranslation.is_marked,
+    });
+
+    if (curTranslation.is_marked && onUnFav) {
+      onUnFav(() =>
+        handleFavoriteClick({
+          ...curTranslation,
+          is_marked: !curTranslation.is_marked,
+        })
+      );
+    }
   };
 
-  return (
-    <View className={className}>
-      <View className="relative px-7 py-4 bg-white rounded-xl shadow-sm gap-2">
-        <View className="flex flex-row items-center text-base">
-          <Text className="font-semibold">{source_language}</Text>
-          <Text className="ml-4 text-[#036]">{source_text}</Text>
+  const renderCard = () => {
+    return (
+      <View className={className}>
+        <View className="relative px-7 py-4 bg-white rounded-xl shadow-sm gap-2">
+          <View className="flex flex-row items-center text-base">
+            <Text className="font-semibold">{source_language}</Text>
+            <Text className="ml-4 text-[#036]">{source_text}</Text>
+          </View>
+          <View className="w-full h-px bg-[#969696]"></View>
+          <View className="flex flex-row items-center text-base">
+            <Text className=" font-semibold">{target_language}</Text>
+            <Text className="ml-4 text-[#060]">{translated_text}</Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => handleFavoriteClick(translationTemp)}
+            className="absolute top-[6px] right-2"
+          >
+            {is_marked ? (
+              <FontAwesome name="star" size={20} color="black" />
+            ) : (
+              <FontAwesome name="star-o" size={20} color="black" />
+            )}
+          </TouchableOpacity>
         </View>
-        <View className="w-full h-px bg-[#969696]"></View>
-        <View className="flex flex-row items-center text-base">
-          <Text className=" font-semibold">{target_language}</Text>
-          <Text className="ml-4 text-[#060]">{translated_text}</Text>
-        </View>
-        <TouchableOpacity
-          onPress={() => handleFavoriteClick()}
-          className="absolute top-[6px] right-2"
-        >
-          {is_marked ? (
-            <FontAwesome name="star" size={20} color="black" />
-          ) : (
-            <FontAwesome name="star-o" size={20} color="black" />
-          )}
-        </TouchableOpacity>
       </View>
-    </View>
-  );
+    );
+  };
+
+  if (route.name !== "favorite") return renderCard();
+  else if (translationTemp.is_marked) return renderCard();
 }
