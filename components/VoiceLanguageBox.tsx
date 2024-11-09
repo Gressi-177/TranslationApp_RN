@@ -1,17 +1,22 @@
 import Languages from "@/constants/Languages";
+import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import Language from "@/models/Language";
+import VoiceTranslation from "@/models/VoiceTranslation";
 import useStoreGlobal from "@/stores/useStoreGlobal";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useCallback } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
+import translate from "translate";
 
-function VoiceLanguageBox() {
-  const [voice, setVoice] = useState({
-    sourceVoice: false,
-    targetVoice: false,
-  });
+interface VoiceLanguageBoxProps {
+  onUpdate: (voiceTransition: VoiceTranslation) => Promise<void>;
+}
+
+function VoiceLanguageBox({ onUpdate }: VoiceLanguageBoxProps) {
+  const { isRecording, transcription, startRecording, stopRecording } =
+    useAudioRecorder();
 
   const sourceLanguage = useStoreGlobal((state) => state.sourceLang);
   const targetLanguage = useStoreGlobal((state) => state.targetLang);
@@ -19,50 +24,40 @@ function VoiceLanguageBox() {
   const setTargetLang = useStoreGlobal((state) => state.setTargetLang);
   const swapLanguages = useStoreGlobal((state) => state.swapLanguages);
 
-  const onTouchOpenVoice = (lanaguage: Language) => {
-    if (lanaguage.code === sourceLanguage.code) {
-      setVoice((prev) => ({
-        ...prev,
-        sourceVoice: !prev.sourceVoice,
-      }));
-    } else {
-      setVoice((prev) => ({
-        ...prev,
-        targetVoice: !prev.targetVoice,
-      }));
-    }
-  };
+  useEffect(() => {
+    if (transcription) {
+      const saveTranslatedText = async () => {
+        const translation = await translate(transcription, {
+          from: sourceLanguage.code,
+          to: targetLanguage.code,
+        });
 
-  const renderSourceIcon = useCallback(
-    () => (
-      <TouchableOpacity
-        className="p-2 rounded-full"
-        style={{
-          backgroundColor: voice.sourceVoice ? "#FF6600" : "#003366",
-        }}
-        onPress={() => onTouchOpenVoice(sourceLanguage)}
-        disabled={voice.targetVoice}
-      >
-        <Ionicons name="mic" size={24} color={"white"} />
-      </TouchableOpacity>
-    ),
-    [sourceLanguage.img, voice]
-  );
+        onUpdate({
+          source_text: transcription,
+          source_language: sourceLanguage.code,
+          translated_text: translation,
+          target_language: targetLanguage.code,
+          is_mine: true,
+        });
+      };
+
+      saveTranslatedText();
+    }
+  }, [transcription]);
 
   const renderTargetIcon = useCallback(
     () => (
       <TouchableOpacity
         className="p-2 rounded-full"
         style={{
-          backgroundColor: voice.targetVoice ? "#FF6600" : "#003366",
+          backgroundColor: isRecording ? "#FF6600" : "#003366",
         }}
-        onPress={() => onTouchOpenVoice(targetLanguage)}
-        disabled={voice.sourceVoice}
+        onPress={isRecording ? stopRecording : startRecording}
       >
         <Ionicons name="mic" size={24} color={"white"} />
       </TouchableOpacity>
     ),
-    [targetLanguage.img, voice]
+    [targetLanguage.img, isRecording]
   );
 
   return (
@@ -75,7 +70,6 @@ function VoiceLanguageBox() {
           labelField="name"
           valueField="code"
           data={Languages}
-          renderLeftIcon={renderSourceIcon}
           renderRightIcon={() => <></>}
           value={sourceLanguage.code}
           onChange={setSourceLang}
