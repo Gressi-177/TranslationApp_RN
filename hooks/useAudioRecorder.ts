@@ -36,6 +36,10 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
     if (!hasPermission) return;
     try {
       setIsPending(true);
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true, // Cho phép ghi âm trên iOS
+        playsInSilentModeIOS: true, // Cho phép ghi âm ngay cả khi thiết bị ở chế độ im lặng
+      });
       const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
