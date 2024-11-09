@@ -17,6 +17,7 @@ import Translation from "@/models/Translation";
 import useStoreGlobal from "@/stores/useStoreGlobal";
 import DBProvider from "@/utils/database";
 import { Ionicons } from "@expo/vector-icons";
+import AudioRecord from "@/components/AudioRecord";
 
 const HomePage = () => {
   const db = useSQLiteContext();
@@ -148,6 +149,7 @@ const HomePage = () => {
           >
             <Ionicons name="mic" size={22} color={"white"} />
           </TouchableOpacity>
+          <AudioRecord />
           <TouchableOpacity
             className="bg-[#FF6600] py-2 px-4 rounded-full"
             onPress={() => translateText(sourceText)}
