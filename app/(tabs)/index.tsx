@@ -38,6 +38,12 @@ const HomePage = () => {
     translate.engine = "google";
   }, []);
 
+  useEffect(() => {
+    if (transcription) {
+      setSourceText(transcription);
+    }
+  }, [transcription]);
+
   const translateText = async (text: string) => {
     if (!text) return;
 
@@ -138,16 +144,7 @@ const HomePage = () => {
         <View className="flex flex-row justify-between items-center">
           <TouchableOpacity
             className="bg-[#003366] p-2 rounded-full"
-            onPress={() => {
-              if (isRecording) {
-                stopRecording();
-                if (transcription) {
-                  setSourceText(transcription);
-                }
-              } else {
-                startRecording();
-              }
-            }}
+            onPress={isRecording ? stopRecording : startRecording}
           >
             <Ionicons
               name={isRecording ? "stop" : "mic"}
