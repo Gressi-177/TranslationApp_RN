@@ -11,8 +11,8 @@ import translate from "translate";
 
 import DBProvider from "@/utils/database";
 import useStoreGlobal from "@/stores/useStoreGlobal";
-import TranslationCard from "@/components/TranslationCard";
 import VoiceLanguageBox from "@/components/VoiceLanguageBox";
+import VoiceTranslationMessage from "@/components/VoiceTranslationMessage";
 import VoiceTranslation, {
   VoiceTranslationRoom,
 } from "@/models/VoiceTranslation";
@@ -173,7 +173,7 @@ const ConversationPage = () => {
               key={`${t.id}${index}`}
               className={`mb-4 ${t.is_mine ? "items-end" : "items-start"}`}
             >
-              <TranslationCard
+              <VoiceTranslationMessage
                 translation={t}
                 className={t.is_mine ? "self-end" : "self-start"}
               />
