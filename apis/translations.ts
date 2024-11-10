@@ -1,6 +1,7 @@
-const API_URL = "http://192.168.1.2:8000/api/v1";
-const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
-const OPENAI_API_KEY = "";
+const API_URL = "http://192.168.2.24:8000/api/v1";
+const AI_API_KEY = "AIzaSyDmizljnUniKUh0WU62rn6oEdT176JQ6Mc";
+const AI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${AI_API_KEY}`;
+
 export const postAudio = async (
   base64Data: string,
   language: string = "en"
@@ -26,21 +27,21 @@ export const postAudio = async (
   return response.json();
 };
 
-export const postQuestion = async (language: string, question: string) => {
-  const response = await fetch(OPENAI_API_URL, {
+export const postQuestion = async (question: string) => {
+  const response = await fetch(AI_API_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
     },
     body: JSON.stringify({
-      model: "gpt-4",
-      messages: [
+      contents: [
         {
-          role: "system",
-          content: `Trả lời câu hỏi sau bằng ngôn ngữ: ${language}.`,
+          parts: [
+            {
+              text: question,
+            },
+          ],
         },
-        { role: "user", content: question },
       ],
     }),
   });

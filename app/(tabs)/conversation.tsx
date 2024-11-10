@@ -7,6 +7,8 @@ import TranslationCard from "@/components/TranslationCard";
 import VoiceTranslation from "@/models/VoiceTranslation";
 import VoiceLanguageBox from "@/components/VoiceLanguageBox";
 import { postQuestion } from "@/apis/translations";
+import translate from "translate";
+import useStoreGlobal from "@/stores/useStoreGlobal";
 
 const ConversationPage = () => {
   const db = useSQLiteContext();
@@ -14,6 +16,7 @@ const ConversationPage = () => {
   const [voiceTranslations, setVoiceTranslations] = useState<
     VoiceTranslation[]
   >([]);
+  const targetLanguage = useStoreGlobal((state) => state.targetLang);
 
   useEffect(() => {
     const fetchVoiceTranslations = async () => {
@@ -40,9 +43,16 @@ const ConversationPage = () => {
 
     if (!changes) return;
 
+    const questionPrefix = await translate(
+      "Answer the following question briefly in maximum 50 characters",
+      {
+        from: "en",
+        to: targetLanguage.code,
+      }
+    );
+
     const response = await postQuestion(
-      voiceTranslation.source_language,
-      voiceTranslation.source_text
+      `${questionPrefix}: ${voiceTranslation.source_text}`
     );
     console.log("====================================");
     console.log(response, 123);
