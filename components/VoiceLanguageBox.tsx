@@ -45,19 +45,16 @@ function VoiceLanguageBox({ onUpdate }: VoiceLanguageBoxProps) {
     }
   }, [transcription]);
 
-  const renderTargetIcon = useCallback(
-    () => (
-      <TouchableOpacity
-        className="p-2 rounded-full"
-        style={{
-          backgroundColor: isRecording ? "#FF6600" : "#003366",
-        }}
-        onPress={isRecording ? stopRecording : startRecording}
-      >
-        <Ionicons name="mic" size={24} color={"white"} />
-      </TouchableOpacity>
-    ),
-    [targetLanguage.img, isRecording]
+  const renderTargetIcon = () => (
+    <TouchableOpacity
+      className="p-2 rounded-full"
+      style={{
+        backgroundColor: isRecording ? "#FF6600" : "#003366",
+      }}
+      onPress={isRecording ? stopRecording : startRecording}
+    >
+      <Ionicons name="mic" size={24} color={"white"} />
+    </TouchableOpacity>
   );
 
   return (

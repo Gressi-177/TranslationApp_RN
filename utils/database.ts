@@ -133,7 +133,7 @@ const DBProvider = {
     }
   ) => {
     return await db.getAllAsync<VoiceTranslation>(
-      "SELECT * FROM voice_conversation ORDER BY created_at ASC LIMIT ?",
+      "SELECT * FROM voice_conversation ORDER BY created_at DESC LIMIT ?",
       options.limit
     );
   },
