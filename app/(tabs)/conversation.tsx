@@ -1,43 +1,94 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Platform, ScrollView, View } from "react-native";
+import {
+  ActivityIndicator,
+  Platform,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
+import translate from "translate";
 
 import DBProvider from "@/utils/database";
-import TranslationCard from "@/components/TranslationCard";
-import VoiceTranslation from "@/models/VoiceTranslation";
-import VoiceLanguageBox from "@/components/VoiceLanguageBox";
-import { postQuestion } from "@/apis/translations";
-import translate from "translate";
 import useStoreGlobal from "@/stores/useStoreGlobal";
+import TranslationCard from "@/components/TranslationCard";
+import VoiceLanguageBox from "@/components/VoiceLanguageBox";
+import VoiceTranslation, {
+  VoiceTranslationRoom,
+} from "@/models/VoiceTranslation";
+import { postQuestion } from "@/apis/translations";
 
 const ConversationPage = () => {
   const db = useSQLiteContext();
   const scrollViewRef = useRef<ScrollView>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [voiceTranslationRoom, setVoiceTranslationRoom] =
+    useState<VoiceTranslationRoom>();
   const [voiceTranslations, setVoiceTranslations] = useState<
     VoiceTranslation[]
   >([]);
 
+  const sourceLanguage = useStoreGlobal((state) => state.sourceLang);
+  const targetLanguage = useStoreGlobal((state) => state.targetLang);
+
   useEffect(() => {
     const fetchVoiceTranslations = async () => {
-      const defVoiceTranslations = await DBProvider.getVoiceConversation(db, {
-        limit: 10,
-      });
+      setIsLoading(true);
 
+      let defVoiceTranslationRoom = await DBProvider.getVoiceConversationRoom(
+        db,
+        {
+          sourceLanguage: sourceLanguage.code,
+          targetLanguage: targetLanguage.code,
+        }
+      );
+
+      if (!defVoiceTranslationRoom) {
+        const id = (
+          await DBProvider.insertVoiceConversationRoom(
+            db,
+            sourceLanguage.code,
+            targetLanguage.code
+          )
+        ).lastInsertRowId;
+
+        if (id) {
+          defVoiceTranslationRoom = {
+            id: id,
+            source_language: sourceLanguage.code,
+            target_language: targetLanguage.code,
+          };
+        }
+      }
+
+      if (!defVoiceTranslationRoom?.id) {
+        setIsLoading(false);
+        return;
+      }
+
+      const defVoiceTranslations =
+        await DBProvider.getVoiceConversationMessages(db, {
+          roomId: defVoiceTranslationRoom.id,
+          limit: 10,
+        });
+
+      setVoiceTranslationRoom(defVoiceTranslationRoom);
       setVoiceTranslations(defVoiceTranslations);
+      setIsLoading(false);
     };
 
     fetchVoiceTranslations();
-  }, []);
-
-  useEffect(() => {
-    if (scrollViewRef.current) {
-      scrollViewRef.current.scrollToEnd({ animated: true });
-    }
-  }, [voiceTranslations]);
+  }, [sourceLanguage, targetLanguage]);
 
   const handleUpdate = async (voiceTranslation: VoiceTranslation) => {
+    if (!voiceTranslationRoom?.id) return;
+
     const changes = (
-      await DBProvider.insertVoiceConversation(db, voiceTranslation)
+      await DBProvider.insertVoiceConversationMessage(
+        db,
+        voiceTranslationRoom.id,
+        voiceTranslation
+      )
     ).changes;
 
     if (!changes) return;
@@ -54,6 +105,8 @@ const ConversationPage = () => {
   const updateAITranslationAnswer = async (
     voiceTranslation: VoiceTranslation
   ) => {
+    if (!voiceTranslationRoom?.id) return;
+
     const questionPrefix = await translate(
       "Answer the following question briefly in maximum 50 characters",
       {
@@ -85,7 +138,11 @@ const ConversationPage = () => {
     };
 
     const changes = (
-      await DBProvider.insertVoiceConversation(db, AITransaltion)
+      await DBProvider.insertVoiceConversationMessage(
+        db,
+        voiceTranslationRoom.id,
+        AITransaltion
+      )
     ).changes;
 
     if (!changes) return;
@@ -95,11 +152,25 @@ const ConversationPage = () => {
 
   return (
     <View className={`flex-1 relative ${Platform.OS === "ios" && "bg-white"}`}>
-      <ScrollView ref={scrollViewRef} className="p-4 pb-0 h-full mb-4">
-        {voiceTranslations &&
+      <ScrollView
+        ref={scrollViewRef}
+        scrollEventThrottle={400}
+        onContentSizeChange={() =>
+          scrollViewRef.current?.scrollToEnd({ animated: true })
+        }
+        className="p-4 pb-0 h-full"
+      >
+        {isLoading && (
+          <View className="p-4 items-center">
+            <ActivityIndicator size="large" color="#2196f3" />
+            <Text>Loading more...</Text>
+          </View>
+        )}
+        {!isLoading &&
+          voiceTranslations &&
           [...voiceTranslations].reverse().map((t, index) => (
             <View
-              key={index}
+              key={`${t.id}${index}`}
               className={`mb-4 ${t.is_mine ? "items-end" : "items-start"}`}
             >
               <TranslationCard

@@ -10,4 +10,11 @@ interface VoiceTranslation {
   created_at?: Date;
 }
 
+interface VoiceTranslationRoom {
+  id?: number;
+  source_language: string;
+  target_language: string;
+}
+
 export default VoiceTranslation;
+export { VoiceTranslationRoom };

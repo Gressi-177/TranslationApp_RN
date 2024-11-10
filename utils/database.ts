@@ -1,5 +1,7 @@
 import Translation from "@/models/Translation";
-import VoiceTranslation from "@/models/VoiceTranslation";
+import VoiceTranslation, {
+  VoiceTranslationRoom,
+} from "@/models/VoiceTranslation";
 import * as SQLite from "expo-sqlite";
 
 const DBProvider = {
@@ -32,8 +34,17 @@ const DBProvider = {
       `);
       await db.execAsync(`
         PRAGMA journal_mode = 'wal';
-        CREATE TABLE voice_conversation (
+        CREATE TABLE voice_conversation_room (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            source_language VARCHAR(5) NOT NULL,
+            target_language VARCHAR(5) NOT NULL
+        )
+      `);
+      await db.execAsync(`
+        PRAGMA journal_mode = 'wal';
+        CREATE TABLE voice_conversation_messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            room_id INTEGER NOT NULL,
             source_text TEXT NOT NULL,
             source_language VARCHAR(5) NOT NULL,
             translated_text TEXT NOT NULL,
@@ -112,12 +123,43 @@ const DBProvider = {
     await db.runAsync("UPDATE translations SET is_deleted = ?", [1]);
   },
 
-  insertVoiceConversation: async (
+  //Voice Conversation Room
+  insertVoiceConversationRoom: async (
     db: SQLite.SQLiteDatabase,
+    sourceLanguage: string,
+    targetLanguage: string
+  ) => {
+    return await db.runAsync(
+      `INSERT INTO voice_conversation_room (source_language, target_language) VALUES (?, ?)`,
+      sourceLanguage,
+      targetLanguage
+    );
+  },
+
+  getVoiceConversationRoom: async (
+    db: SQLite.SQLiteDatabase,
+    options: {
+      sourceLanguage: string;
+      targetLanguage: string;
+    }
+  ) => {
+    return await db.getFirstAsync<VoiceTranslationRoom>(
+      "SELECT * FROM voice_conversation_room WHERE source_language = ? AND target_language = ? LIMIT ?",
+      options.sourceLanguage,
+      options.targetLanguage,
+      1
+    );
+  },
+
+  //Voice Conversation Messages
+  insertVoiceConversationMessage: async (
+    db: SQLite.SQLiteDatabase,
+    roomId: number,
     data: VoiceTranslation
   ) => {
     return await db.runAsync(
-      `INSERT INTO voice_conversation (source_text, source_language, translated_text, target_language, is_mine) VALUES (?, ?, ?, ?, ?)`,
+      `INSERT INTO voice_conversation_messages (room_id, source_text, source_language, translated_text, target_language, is_mine) VALUES (?, ?, ?, ?, ?, ?)`,
+      roomId,
       data.source_text,
       data.source_language,
       data.translated_text,
@@ -126,15 +168,19 @@ const DBProvider = {
     );
   },
 
-  getVoiceConversation: async (
+  getVoiceConversationMessages: async (
     db: SQLite.SQLiteDatabase,
     options: {
+      roomId: number;
       limit: number;
+      offset?: number;
     }
   ) => {
     return await db.getAllAsync<VoiceTranslation>(
-      "SELECT * FROM voice_conversation ORDER BY created_at DESC LIMIT ?",
-      options.limit
+      "SELECT * FROM voice_conversation_messages WHERE room_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?",
+      options.roomId,
+      options.limit,
+      options.offset || 0
     );
   },
 };
