@@ -14,7 +14,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import ReactMotion from "@/components/ReactMotion";
 
 export default function TabLayout() {
   // const [appState, setAppState] = useState(AppState.currentState);
