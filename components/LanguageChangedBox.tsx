@@ -88,13 +88,13 @@ const styles = StyleSheet.create({
   box: {
     ...Platform.select({
       ios: {
-        shadowColor: "rgba(0, 0, 0, 0.15)",
-        shadowOpacity: 0.15,
+        shadowColor: "#000000",
         shadowOffset: {
-          height: 0,
-          width: 1,
+          width: 0,
+          height: 2,
         },
-        shadowRadius: 3,
+        shadowOpacity: 0.17,
+        shadowRadius: 2.54,
       },
       android: {
         elevation: 3,

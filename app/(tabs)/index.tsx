@@ -19,6 +19,7 @@ import Translation from "@/models/Translation";
 import useStoreGlobal from "@/stores/useStoreGlobal";
 import DBProvider from "@/utils/database";
 import { Ionicons } from "@expo/vector-icons";
+import { useIsFocused } from "@react-navigation/native";
 
 const HomePage = () => {
   const db = useSQLiteContext();
@@ -36,6 +37,8 @@ const HomePage = () => {
   const { isRecording, transcription, startRecording, stopRecording } =
     useAudioRecorder();
 
+  const isFocused = useIsFocused();
+
   useEffect(() => {
     translate.engine = "google";
   }, []);
@@ -43,8 +46,15 @@ const HomePage = () => {
   useEffect(() => {
     if (transcription) {
       setSourceText(transcription);
+      translateText(transcription);
     }
   }, [transcription]);
+
+  useEffect(() => {
+    if (isFocused && sourceText) {
+      translateText(sourceText);
+    }
+  }, [isFocused]);
 
   const translateText = async (text: string) => {
     if (!text) return;
@@ -108,80 +118,18 @@ const HomePage = () => {
   };
 
   return (
-    <ScrollView className="py-4 bg-[#fff]">
-      <LanguageChangedBox />
-      <View className="px-5 py-[2px] mt-5">
-        <View style={styles.box} className="p-5 rounded-2xl bg-[#fff]">
-          <View className="flex flex-row justify-between items-center">
-            <View className="flex flex-row items-center">
-              <Text className="text-[#003366] text-[16px] font-bold mr-2">
-                {sourceLanguage.name}
-              </Text>
-              <TouchableOpacity
-                onPress={() =>
-                  voiceText(translatedText, sourceLanguage.language)
-                }
-              >
-                <Ionicons name="volume-low-outline" size={24} color="#003366" />
-              </TouchableOpacity>
-            </View>
-            <TouchableOpacity
-              onPress={() => {
-                if (sourceText) {
-                  setSourceText("");
-                }
-                setIsTranslated(false);
-                setTranslatedText("");
-              }}
-            >
-              <Ionicons name="close" size={24} />
-            </TouchableOpacity>
-          </View>
-          <View className="min-h-[105px] mb-4">
-            <TextInput
-              className="border-0 text-black"
-              multiline
-              numberOfLines={1}
-              placeholder="Enter text here..."
-              placeholderTextColor={"#bbbbbb"}
-              value={sourceText}
-              onChangeText={setSourceText}
-            />
-          </View>
-
-          <View className="flex flex-row justify-between items-center">
-            <TouchableOpacity
-              className="bg-[#003366] p-2 rounded-full"
-              onPress={isRecording ? stopRecording : startRecording}
-            >
-              <Ionicons
-                name={isRecording ? "stop" : "mic"}
-                size={22}
-                color={"white"}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="bg-[#FF6600] py-2 px-4 rounded-full"
-              onPress={() => translateText(sourceText)}
-            >
-              <Text className="text-white text-[14px]">Translate</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-
-      {isTranslated && (
+    <ScrollView className="bg-[#fff]">
+      <View className="py-4">
+        <LanguageChangedBox />
         <View className="px-5 py-[2px] mt-5">
           <View style={styles.box} className="p-5 rounded-2xl bg-[#fff]">
             <View className="flex flex-row justify-between items-center">
               <View className="flex flex-row items-center">
                 <Text className="text-[#003366] text-[16px] font-bold mr-2">
-                  {targetLanguage.name}
+                  {sourceLanguage.name}
                 </Text>
                 <TouchableOpacity
-                  onPress={() =>
-                    voiceText(translatedText, targetLanguage.language)
-                  }
+                  onPress={() => voiceText(sourceText, sourceLanguage.language)}
                 >
                   <Ionicons
                     name="volume-low-outline"
@@ -190,39 +138,113 @@ const HomePage = () => {
                   />
                 </TouchableOpacity>
               </View>
-            </View>
-            <View className="min-h-[105px] mb-4">
-              <TextInput
-                className="border-0 text-black"
-                multiline
-                placeholder="Enter text here..."
-                placeholderTextColor={"#bbbbbb"}
-                value={translatedText}
-                editable={false}
-              />
-            </View>
-
-            <View className="flex flex-row justify-end space-x-4 gap-4">
               <TouchableOpacity
-                onPress={() => Clipboard.setStringAsync(translatedText)}
-              >
-                <Ionicons name="copy-outline" size={24} color="#003366" />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={updateMarkTranslation}>
-                <Ionicons
-                  name={
-                    currentTranslation && currentTranslation.is_marked
-                      ? "star"
-                      : "star-outline"
+                onPress={() => {
+                  if (sourceText) {
+                    setSourceText("");
                   }
-                  size={24}
-                  color="#003366"
+                  setIsTranslated(false);
+                  setTranslatedText("");
+                }}
+              >
+                <Ionicons name="close" size={24} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView
+              style={{ minHeight: 105, maxHeight: 160, marginBottom: 16 }}
+            >
+              <View className="py-2">
+                <TextInput
+                  className="border-0 text-black"
+                  multiline
+                  numberOfLines={1}
+                  placeholder="Enter text here..."
+                  placeholderTextColor={"#bbbbbb"}
+                  value={sourceText}
+                  onChangeText={setSourceText}
                 />
+              </View>
+            </ScrollView>
+
+            <View className="flex flex-row justify-between items-center">
+              <TouchableOpacity
+                className="bg-[#003366] p-2 rounded-full"
+                onPress={isRecording ? stopRecording : startRecording}
+              >
+                <Ionicons
+                  name={isRecording ? "stop" : "mic"}
+                  size={22}
+                  color={"white"}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="bg-[#FF6600] py-2 px-4 rounded-full"
+                onPress={() => translateText(sourceText)}
+              >
+                <Text className="text-white text-[14px]">Translate</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
-      )}
+
+        {isTranslated && (
+          <View className="px-5 py-[2px] mt-5">
+            <View style={styles.box} className="p-5 rounded-2xl bg-[#fff]">
+              <View className="flex flex-row justify-between items-center">
+                <View className="flex flex-row items-center">
+                  <Text className="text-[#003366] text-[16px] font-bold mr-2">
+                    {targetLanguage.name}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() =>
+                      voiceText(translatedText, targetLanguage.language)
+                    }
+                  >
+                    <Ionicons
+                      name="volume-low-outline"
+                      size={24}
+                      color="#003366"
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <ScrollView
+                style={{ minHeight: 105, maxHeight: 160, marginBottom: 16 }}
+              >
+                <View className="py-2">
+                  <TextInput
+                    className="border-0 text-black"
+                    multiline
+                    placeholder="Enter text here..."
+                    placeholderTextColor={"#bbbbbb"}
+                    value={translatedText}
+                    editable={false}
+                  />
+                </View>
+              </ScrollView>
+
+              <View className="flex flex-row justify-end space-x-4 gap-4">
+                <TouchableOpacity
+                  onPress={() => Clipboard.setStringAsync(translatedText)}
+                >
+                  <Ionicons name="copy-outline" size={24} color="#003366" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={updateMarkTranslation}>
+                  <Ionicons
+                    name={
+                      currentTranslation && currentTranslation.is_marked
+                        ? "star"
+                        : "star-outline"
+                    }
+                    size={24}
+                    color="#003366"
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
+      </View>
     </ScrollView>
   );
 };
@@ -232,13 +254,13 @@ const styles = StyleSheet.create({
   box: {
     ...Platform.select({
       ios: {
-        shadowColor: "rgba(0, 0, 0, 0.15)",
-        shadowOpacity: 0.15,
+        shadowColor: "#000000",
         shadowOffset: {
-          height: 0,
-          width: 1,
+          width: 0,
+          height: 2,
         },
-        shadowRadius: 3,
+        shadowOpacity: 0.17,
+        shadowRadius: 2.54,
       },
       android: {
         elevation: 3,
