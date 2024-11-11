@@ -1,11 +1,11 @@
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useRoute } from "@react-navigation/native";
+import { useSQLiteContext } from "expo-sqlite";
 import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
-import { useSQLiteContext } from "expo-sqlite";
-import { useRoute } from "@react-navigation/native";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 
-import DBProvider from "@/utils/database";
 import Translation from "@/models/Translation";
+import DBProvider from "@/utils/database";
 interface TranslationCard {
   translation: Translation;
   className?: string;
@@ -55,16 +55,34 @@ export default function TranslationCard({
   const renderCard = () => {
     return (
       <View className={className}>
-        <View className="relative px-7 py-4 bg-white rounded-xl shadow-sm gap-2">
-          <View className="flex flex-row items-center text-base">
-            <Text className="font-semibold">{source_language}</Text>
-            <Text className="ml-4 text-[#036]">{source_text}</Text>
-          </View>
-          <View className="w-full h-px bg-[#969696]"></View>
-          <View className="flex flex-row items-center text-base">
-            <Text className=" font-semibold">{target_language}</Text>
-            <Text className="ml-4 text-[#060]">{translated_text}</Text>
-          </View>
+        <View className="relative px-7 py-4 bg-white rounded-xl shadow-sm">
+          <TouchableOpacity
+            className="gap-2"
+            onPress={() => console.log("Heloo")}
+          >
+            <View className="flex flex-row items-center text-base pr-5">
+              <Text className="font-semibold w-5">{source_language}</Text>
+              <Text
+                className="ml-4 text-[#036]"
+                numberOfLines={3}
+                ellipsizeMode="tail"
+              >
+                {source_text}
+              </Text>
+            </View>
+            <View className="w-full h-px bg-[#969696]"></View>
+            <View className="flex flex-row items-center text-base pr-5">
+              <Text className="w-5 font-semibold">{target_language}</Text>
+              <Text
+                className="ml-4 text-[#060]"
+                numberOfLines={3}
+                ellipsizeMode="tail"
+              >
+                {translated_text}
+              </Text>
+            </View>
+          </TouchableOpacity>
+
           <TouchableOpacity
             onPress={() => handleFavoriteClick(translationTemp)}
             className="absolute top-[8px] right-2"
