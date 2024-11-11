@@ -81,7 +81,7 @@ export default function TabTwoScreen() {
           className="absolute bottom-5 left-5 right-5 bg-gray-800 p-4 rounded-xl items-center"
         >
           <Text className="text-white text-base">
-            Bạn vừa thực hiện một hành động.
+            The favorite has been deleted
           </Text>
           <TouchableOpacity
             onPress={() => {
@@ -90,7 +90,7 @@ export default function TabTwoScreen() {
               hidePopup();
             }}
           >
-            <Text className="text-green-500 text-base mt-2">Hoàn Tác</Text>
+            <Text className="text-green-500 text-base mt-2">Undo</Text>
           </TouchableOpacity>
         </Animated.View>
       )}
