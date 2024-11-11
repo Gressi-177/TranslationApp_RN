@@ -52,14 +52,15 @@ export default function TranslationCard({
     }
   };
 
+  const handleViewTranslation = () => {
+    console.log("Viewing Translation Details");
+  };
+
   const renderCard = () => {
     return (
       <View className={className}>
         <View className="relative px-7 py-4 bg-white rounded-xl shadow-sm">
-          <TouchableOpacity
-            className="gap-2"
-            onPress={() => console.log("Heloo")}
-          >
+          <TouchableOpacity className="gap-2" onPress={handleViewTranslation}>
             <View className="flex flex-row items-center text-base pr-5">
               <Text className="font-semibold w-5">{source_language}</Text>
               <Text
