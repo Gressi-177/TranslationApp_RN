@@ -164,7 +164,7 @@ const DBProvider = {
       data.source_language,
       data.translated_text,
       data.target_language,
-      data.is_mine
+      data.is_mine || false
     );
   },
 

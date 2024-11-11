@@ -9,11 +9,10 @@ import {
   View,
 } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
+import translate from "translate";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 import DBProvider from "@/utils/database";
-import Translation from "@/models/Translation";
-import translate from "translate";
 import VoiceTranslation from "@/models/VoiceTranslation";
 
 interface VoiceTranslationMessageProps {
@@ -71,9 +70,12 @@ export default function VoiceTranslationMessage({
 
   const handleSelectionChange = (
     event: NativeSyntheticEvent<TextInputSelectionChangeEventData>,
-    text: string
+    text: string,
+    isSource: boolean
   ) => {
     const { selection } = event.nativeEvent;
+    const sourceLang = isSource ? source_language : target_language;
+    const targetLang = isSource ? target_language : source_language;
 
     if (selection.start !== selection.end) {
       if (timeoutRef.current) {
@@ -84,8 +86,8 @@ export default function VoiceTranslationMessage({
         const translation = await translate(
           text.slice(selection.start, selection.end),
           {
-            from: source_language,
-            to: target_language,
+            from: sourceLang,
+            to: targetLang,
           }
         );
 
@@ -93,20 +95,14 @@ export default function VoiceTranslationMessage({
 
         setSelectedTranslation({
           source_text: text.slice(selection.start, selection.end),
-          source_language: source_language,
+          source_language: sourceLang,
           translated_text: translation,
-          target_language: target_language,
-          is_mine: true,
+          target_language: targetLang,
         });
 
         setShowContextMenu(true);
       }, 500);
     }
-  };
-
-  const handleCopy = () => {
-    setShowContextMenu(false);
-    console.log("Đã sao chép văn bản!");
   };
 
   return (
@@ -117,7 +113,9 @@ export default function VoiceTranslationMessage({
             ref={textInputRef}
             className="text-[#036]"
             value={source_text}
-            onSelectionChange={(e) => handleSelectionChange(e, source_text)}
+            onSelectionChange={(e) =>
+              handleSelectionChange(e, source_text, true)
+            }
           />
         </View>
         <View className="w-full h-px bg-[#969696]"></View>
@@ -126,7 +124,9 @@ export default function VoiceTranslationMessage({
             ref={textInputRef}
             className="text-[#060]"
             value={translated_text}
-            onSelectionChange={(e) => handleSelectionChange(e, translated_text)}
+            onSelectionChange={(e) =>
+              handleSelectionChange(e, translated_text, false)
+            }
           />
         </View>
         <Modal
