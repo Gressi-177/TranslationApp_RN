@@ -1,23 +1,23 @@
+import { useSQLiteContext } from "expo-sqlite";
 import { useRef, useState } from "react";
 import {
   Modal,
   NativeSyntheticEvent,
-  Text,
   TextInput,
   TextInputSelectionChangeEventData,
   TouchableOpacity,
   View,
 } from "react-native";
-import { useSQLiteContext } from "expo-sqlite";
 import translate from "translate";
 
-import DBProvider from "@/utils/database";
 import VoiceTranslation from "@/models/VoiceTranslation";
-import { Ionicons } from "@expo/vector-icons";
+import DBProvider from "@/utils/database";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
 
 interface VoiceTranslationMessageProps {
   translation: VoiceTranslation;
   className?: string;
+  isModal?: boolean;
   onUnFav?: (handleUndo: () => void) => void;
 }
 
@@ -26,6 +26,7 @@ const DOUBLE_PRESS_DELAY = 300;
 export default function VoiceTranslationMessage({
   translation,
   className,
+  isModal = false,
   onUnFav,
 }: VoiceTranslationMessageProps) {
   const db = useSQLiteContext();
@@ -106,7 +107,7 @@ export default function VoiceTranslationMessage({
         });
 
         setShowContextMenu(true);
-      }, 500);
+      }, 1000);
     }
   };
 
@@ -118,20 +119,23 @@ export default function VoiceTranslationMessage({
       lastTap.current = now;
     }
   };
-
   return (
     <TouchableOpacity onPress={handleDoublePress} activeOpacity={1}>
-      <View className={className}>
-        <View className="relative px-7 py-4 bg-white rounded-xl shadow-sm gap-2">
-          <View className="text-base relative">
+      <View className={`min-w-[140px] ${className}`}>
+        <View className="relative px-4 py-2 bg-white rounded-xl shadow-sm gap-1 max-w-[250px]">
+          <View className="text-base relative pr-2">
             <TextInput
               ref={textInputRef}
+              multiline={true}
               className="text-[#036]"
+              selectTextOnFocus={isHiddenText ? true : false}
+              editable={isHiddenText ? false : true}
+              cursorColor="transparent"
               value={
-                isHiddenText && !is_mine
-                  ? Array(source_text.length)
-                      .map(() => "*")
-                      .join()
+                isHiddenText && !is_mine && !isModal
+                  ? Array(source_text.length > 30 ? 30 : source_text.length)
+                      .map(() => {})
+                      .join("*")
                   : source_text
               }
               onSelectionChange={(e) =>
@@ -140,15 +144,21 @@ export default function VoiceTranslationMessage({
             />
           </View>
           <View className="w-full h-px bg-[#969696]"></View>
-          <View className="text-base">
+          <View className="text-base pr-2">
             <TextInput
               ref={textInputRef}
+              multiline={true}
               className="text-[#060]"
+              selectTextOnFocus={isHiddenText ? true : false}
+              editable={isHiddenText ? false : true}
+              cursorColor="transparent"
               value={
-                isHiddenText && !is_mine
-                  ? Array(translated_text.length)
-                      .map(() => "*")
-                      .join()
+                isHiddenText && !is_mine && !isModal
+                  ? Array(
+                      translated_text.length > 30 ? 30 : translated_text.length
+                    )
+                      .map(() => {})
+                      .join("*")
                   : translated_text
               }
               onSelectionChange={(e) =>
@@ -164,40 +174,44 @@ export default function VoiceTranslationMessage({
           >
             <View className="flex-1 justify-center items-center bg-black/30">
               <View>
-                <TouchableOpacity
-                  onPress={() => setShowContextMenu(false)}
-                  className="py-2"
-                >
-                  <Text className="text-center">Đóng</Text>
-                </TouchableOpacity>
                 {selectedTranslation && (
-                  <VoiceTranslationMessage translation={selectedTranslation} />
+                  <VoiceTranslationMessage
+                    isModal={true}
+                    translation={selectedTranslation}
+                  />
                 )}
               </View>
             </View>
           </Modal>
-          {!is_mine && (
+          {!is_mine && !isModal && (
             <TouchableOpacity
-              className="absolute top-[8px] right-2"
+              className="absolute top-[6px] right-1"
               onPress={() => setIsHiddenText((prev) => !prev)}
             >
               <Ionicons
                 name={isHiddenText ? "eye-off-outline" : "eye"}
-                size={24}
+                size={20}
                 color="#003366"
               />
             </TouchableOpacity>
           )}
-          {/* <TouchableOpacity
-          onPress={() => handleFavoriteClick(translationTemp)}
-          className="absolute top-[8px] right-2"
-        >
-          {is_marked ? (
-            <FontAwesome name="star" size={20} color="black" />
-          ) : (
-            <FontAwesome name="star-o" size={20} color="black" />
+
+          {!isModal && (
+            <TouchableOpacity
+              onPress={() => handleFavoriteClick(translationTemp)}
+              className={`absolute ${
+                is_mine ? "bottom-0 left-[-24px]" : "bottom-0 right-[-24px]"
+              }`}
+            >
+              <View className="bg-[#fff] rounded-full p-[4px]">
+                {is_marked ? (
+                  <FontAwesome name="star" size={16} color="black" />
+                ) : (
+                  <FontAwesome name="star-o" size={16} color="black" />
+                )}
+              </View>
+            </TouchableOpacity>
           )}
-        </TouchableOpacity> */}
         </View>
       </View>
     </TouchableOpacity>
