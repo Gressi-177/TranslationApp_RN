@@ -7,6 +7,7 @@ import { View, TouchableOpacity, Image, Text, Button } from "react-native";
 
 import LanguageChangedBox from "@/components/LanguageChangedBox";
 import useStoreGlobal from "@/stores/useStoreGlobal";
+import { postImage } from "@/apis/translations";
 
 const CameraPage = () => {
   const cameraRef = useRef<CameraView>(null);
@@ -20,9 +21,12 @@ const CameraPage = () => {
   };
 
   const recognizeText = async (uri: string) => {
-    const result = await TextRecognition.recognize(uri);
+    const response = await fetch(uri);
+    const blob = await response.blob();
 
-    console.log(result.text);
+    const result = await postImage(blob);
+
+    console.log(result);
 
     setSourceText(result.text);
   };
