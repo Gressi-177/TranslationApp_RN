@@ -19,7 +19,6 @@ import Translation from "@/models/Translation";
 import useStoreGlobal from "@/stores/useStoreGlobal";
 import DBProvider from "@/utils/database";
 import { Ionicons } from "@expo/vector-icons";
-import { useIsFocused } from "@react-navigation/native";
 
 const HomePage = () => {
   const db = useSQLiteContext();
@@ -36,7 +35,6 @@ const HomePage = () => {
 
   const { isRecording, transcription, startRecording, stopRecording } =
     useAudioRecorder();
-  const isFocused = useIsFocused();
 
   useEffect(() => {
     translate.engine = "google";
