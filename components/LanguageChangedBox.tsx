@@ -1,7 +1,13 @@
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React, { useCallback } from "react";
-import { Ionicons } from "@expo/vector-icons";
+import {
+  Image,
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
-import { Image, TouchableOpacity, View } from "react-native";
 
 import Languages from "@/constants/Languages";
 import useStoreGlobal from "@/stores/useStoreGlobal";
@@ -19,52 +25,80 @@ const LanguageChangedBox = () => {
   );
 
   const renderTargetIcon = useCallback(
-    () => <Image source={targetLanguage.img} className="w-6 h-6 mr-2" />,
+    () => <Image source={targetLanguage.img} className="w-6 h-6 ml-2" />,
     [targetLanguage.img]
   );
 
   return (
-    <View className="mt-4 p-4 bg-[rgba(255,251,254,1)] shadow-lg rounded-full shadow-black/15">
-      <View
-        className="flex flex-row items-center p-4 shadow-md "
-        style={{ elevation: 3 }}
-      >
-        <Dropdown
-          labelField="name"
-          valueField="code"
-          data={Languages}
-          renderLeftIcon={renderSourceIcon}
-          value={sourceLanguage.code}
-          onChange={setSourceLang}
-          style={{
-            flexGrow: 1,
-            paddingBottom: 2,
-            borderBottomColor: "rgba(189, 189, 189, 1)",
-            borderBottomWidth: 1,
-          }}
-        />
+    <View className="px-4 py-[2px] mt-5">
+      <View style={styles.box} className="bg-[#fff] rounded-[50px]">
+        <View className="flex flex-row items-center p-4">
+          <Dropdown
+            labelField="name"
+            valueField="code"
+            data={Languages}
+            renderLeftIcon={renderSourceIcon}
+            renderRightIcon={() => <></>}
+            value={sourceLanguage.code}
+            onChange={setSourceLang}
+            selectedTextProps={{
+              style: {
+                fontSize: 16,
+                fontWeight: "bold",
+              },
+            }}
+            style={{
+              alignItems: "flex-start",
+              flexGrow: 1,
+              height: 24,
+            }}
+          />
 
-        <TouchableOpacity onPress={swapLanguages} className="px-4">
-          <Ionicons name="swap-horizontal-outline" size={24} />
-        </TouchableOpacity>
+          <TouchableOpacity onPress={swapLanguages}>
+            <MaterialIcons name="swap-horiz" size={24} color="black" />
+          </TouchableOpacity>
 
-        <Dropdown
-          labelField="name"
-          valueField="code"
-          data={Languages}
-          renderLeftIcon={renderTargetIcon}
-          value={targetLanguage.code}
-          onChange={setTargetLang}
-          style={{
-            flexGrow: 1,
-            paddingBottom: 2,
-            borderBottomColor: "rgba(189, 189, 189, 1)",
-            borderBottomWidth: 1,
-          }}
-        />
+          <Dropdown
+            labelField="name"
+            valueField="code"
+            data={Languages}
+            renderRightIcon={renderTargetIcon}
+            value={targetLanguage.code}
+            onChange={setTargetLang}
+            selectedTextProps={{
+              style: {
+                fontSize: 16,
+                fontWeight: "bold",
+              },
+            }}
+            style={{
+              alignItems: "flex-end",
+              flexGrow: 1,
+              height: 24,
+            }}
+          />
+        </View>
       </View>
     </View>
   );
 };
 
 export default LanguageChangedBox;
+const styles = StyleSheet.create({
+  box: {
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(0, 0, 0, 0.15)",
+        shadowOpacity: 0.15,
+        shadowOffset: {
+          height: 0,
+          width: 1,
+        },
+        shadowRadius: 3,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
+  },
+});
