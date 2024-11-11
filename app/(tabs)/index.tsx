@@ -172,7 +172,7 @@ const HomePage = () => {
         </View>
       </View>
 
-      {true && (
+      {isTranslated && (
         <View className="px-5 py-[2px] mt-5">
           <View style={styles.box} className="p-5 rounded-2xl bg-[#fff]">
             <View className="flex flex-row justify-between items-center">
