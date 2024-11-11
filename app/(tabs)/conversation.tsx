@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import translate from "translate";
+import * as Speech from "expo-speech";
 
 import DBProvider from "@/utils/database";
 import useStoreGlobal from "@/stores/useStoreGlobal";
@@ -80,6 +81,19 @@ const ConversationPage = () => {
     fetchVoiceTranslations();
   }, [sourceLanguage, targetLanguage]);
 
+  const voiceText = async (text: string, language: string) => {
+    const isSpeaking = await Speech.isSpeakingAsync();
+
+    if (isSpeaking) {
+      await Speech.stop();
+    }
+
+    Speech.speak(text, {
+      language: language,
+      pitch: 1.0,
+    });
+  };
+
   const handleUpdate = async (voiceTranslation: VoiceTranslation) => {
     if (!voiceTranslationRoom?.id) return;
 
@@ -147,6 +161,7 @@ const ConversationPage = () => {
 
     if (!changes) return;
 
+    voiceText(AITransaltion.source_text, AITransaltion.source_language);
     setVoiceTranslations((prev) => [AITransaltion, ...prev]);
   };
 
