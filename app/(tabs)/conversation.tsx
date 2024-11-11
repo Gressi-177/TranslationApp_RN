@@ -1,3 +1,5 @@
+import * as Speech from "expo-speech";
+import { useSQLiteContext } from "expo-sqlite";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -6,18 +8,16 @@ import {
   Text,
   View,
 } from "react-native";
-import { useSQLiteContext } from "expo-sqlite";
 import translate from "translate";
-import * as Speech from "expo-speech";
 
-import DBProvider from "@/utils/database";
-import useStoreGlobal from "@/stores/useStoreGlobal";
+import { postQuestion } from "@/apis/translations";
 import VoiceLanguageBox from "@/components/VoiceLanguageBox";
 import VoiceTranslationMessage from "@/components/VoiceTranslationMessage";
 import VoiceTranslation, {
   VoiceTranslationRoom,
 } from "@/models/VoiceTranslation";
-import { postQuestion } from "@/apis/translations";
+import useStoreGlobal from "@/stores/useStoreGlobal";
+import DBProvider from "@/utils/database";
 
 const ConversationPage = () => {
   const db = useSQLiteContext();
@@ -175,25 +175,27 @@ const ConversationPage = () => {
         }
         className="p-4 pb-0 h-full"
       >
-        {isLoading && (
-          <View className="p-4 items-center">
-            <ActivityIndicator size="large" color="#2196f3" />
-            <Text>Loading more...</Text>
-          </View>
-        )}
-        {!isLoading &&
-          voiceTranslations &&
-          [...voiceTranslations].reverse().map((t, index) => (
-            <View
-              key={`${t.id}${index}`}
-              className={`mb-4 ${t.is_mine ? "items-end" : "items-start"}`}
-            >
-              <VoiceTranslationMessage
-                translation={t}
-                className={t.is_mine ? "self-end" : "self-start"}
-              />
+        <View className="py-4">
+          {isLoading && (
+            <View className="p-4 items-center">
+              <ActivityIndicator size="large" color="#2196f3" />
+              <Text>Loading more...</Text>
             </View>
-          ))}
+          )}
+          {!isLoading &&
+            voiceTranslations &&
+            [...voiceTranslations].reverse().map((t, index) => (
+              <View
+                key={`${t.id}${index}`}
+                className={`mb-4 ${t.is_mine ? "items-end" : "items-start"}`}
+              >
+                <VoiceTranslationMessage
+                  translation={t}
+                  className={t.is_mine ? "self-end" : "self-start"}
+                />
+              </View>
+            ))}
+        </View>
       </ScrollView>
       <View className="fixed bottom-0 left-0 right-0 p-2 pt-0">
         <VoiceLanguageBox onUpdate={handleUpdate} />

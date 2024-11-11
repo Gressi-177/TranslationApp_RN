@@ -5,9 +5,11 @@ import { create } from "zustand";
 interface StoreGlobalType {
   sourceText: string;
   sourceLang: Language;
+  targetText: string;
   targetLang: Language;
   setSourceText: (text: string) => void;
   setSourceLang: (lang: Language) => void;
+  setTargetText: (text: string) => void;
   setTargetLang: (lang: Language) => void;
   swapLanguages: () => void;
 }
@@ -15,6 +17,7 @@ interface StoreGlobalType {
 const useStoreGlobal = create<StoreGlobalType>()((set) => ({
   sourceText: "",
   sourceLang: Languages[0],
+  targetText: "",
   targetLang: Languages[1],
 
   setSourceText: (text: string) =>
@@ -31,6 +34,11 @@ const useStoreGlobal = create<StoreGlobalType>()((set) => ({
         };
       }
       return { sourceLang: lang };
+    }),
+
+  setTargetText: (text: string) =>
+    set((state) => {
+      return { targetText: text };
     }),
 
   setTargetLang: (lang: Language) =>
