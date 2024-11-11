@@ -1,15 +1,16 @@
-import * as ImagePicker from "expo-image-picker";
-import TextRecognition from "@react-native-ml-kit/text-recognition";
-import React, { useEffect, useRef, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { View, TouchableOpacity, Image, Text, Button } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import React, { useRef, useState } from "react";
+import { Button, Image, Text, TouchableOpacity, View } from "react-native";
 
+import { postImage } from "@/apis/translations";
 import LanguageChangedBox from "@/components/LanguageChangedBox";
 import useStoreGlobal from "@/stores/useStoreGlobal";
-import { postImage } from "@/apis/translations";
+import { useRouter } from "expo-router";
 
 const CameraPage = () => {
+  const router = useRouter();
   const cameraRef = useRef<CameraView>(null);
   const [isFlashOn, setIsFlashOn] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
@@ -21,14 +22,9 @@ const CameraPage = () => {
   };
 
   const recognizeText = async (uri: string) => {
-    const response = await fetch(uri);
-    const blob = await response.blob();
-
-    const result = await postImage(blob);
-
-    console.log(result);
-
+    const result = await postImage(uri);
     setSourceText(result.text);
+    router.replace("/(tabs)/");
   };
 
   const pickImage = async () => {
