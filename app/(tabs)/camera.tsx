@@ -2,11 +2,19 @@ import { Ionicons } from "@expo/vector-icons";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import React, { useRef, useState } from "react";
-import { Button, Image, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Button,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 import { postImage } from "@/apis/translations";
 import LanguageChangedBox from "@/components/LanguageChangedBox";
 import useStoreGlobal from "@/stores/useStoreGlobal";
+import { optimizeImage } from "@/utils/base";
 import { useRouter } from "expo-router";
 
 const CameraPage = () => {
@@ -14,6 +22,8 @@ const CameraPage = () => {
   const cameraRef = useRef<CameraView>(null);
   const [isFlashOn, setIsFlashOn] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const setSourceText = useStoreGlobal((state) => state.setSourceText);
 
@@ -22,9 +32,18 @@ const CameraPage = () => {
   };
 
   const recognizeText = async (uri: string) => {
-    const result = await postImage(uri);
-    setSourceText(result.text);
-    router.replace("/(tabs)/");
+    try {
+      setIsLoading(true);
+      const optimizedUri = await optimizeImage(uri);
+      const result = await postImage(optimizedUri);
+      setSourceText(result.text);
+      setCapturedImage(null);
+      router.replace("/(tabs)/?ref=camera");
+    } catch (error) {
+      console.error("Lỗi:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const pickImage = async () => {
@@ -46,7 +65,7 @@ const CameraPage = () => {
       const data = await cameraRef.current.takePictureAsync(options);
 
       if (!data) return;
-      recognizeText(data.uri);
+      setCapturedImage(data.uri);
     }
   };
 
@@ -67,39 +86,59 @@ const CameraPage = () => {
 
   return (
     <View className="flex-1">
-      <CameraView
-        ref={cameraRef}
-        className="flex-1"
-        style={{ flex: 1 }}
-        facing="back"
-        mode="picture"
-        flash={isFlashOn ? "on" : "off"}
-      >
-        <View className="absolute top-0 left-4 right-4">
-          <LanguageChangedBox />
+      {capturedImage ? (
+        <View className="flex-1 items-center justify-center">
+          <Image
+            source={{ uri: capturedImage }}
+            style={{ width: "100%", height: "80%" }}
+          />
+          <View className="flex flex-row justify-around w-full mt-4">
+            {isLoading ? (
+              <ActivityIndicator size="large" color="#0000ff" />
+            ) : (
+              <Button
+                title="Use Photo"
+                onPress={() => recognizeText(capturedImage)}
+              />
+            )}
+            <Button title="Retake" onPress={() => setCapturedImage(null)} />
+          </View>
         </View>
+      ) : (
+        <CameraView
+          ref={cameraRef}
+          className="flex-1"
+          style={{ flex: 1 }}
+          facing="back"
+          mode="picture"
+          flash={isFlashOn ? "on" : "off"}
+        >
+          <View className="absolute top-0 left-4 right-4">
+            <LanguageChangedBox />
+          </View>
 
-        <View className="absolute bottom-2 left-0 right-0 flex flex-row justify-around items-center">
-          <TouchableOpacity onPress={pickImage} className="p-2">
-            <Image
-              source={require("@/assets/images/placeholder.jpg")}
-              className="w-10 h-10 rounded-md"
-            />
-          </TouchableOpacity>
+          <View className="absolute bottom-2 left-0 right-0 flex flex-row justify-around items-center">
+            <TouchableOpacity onPress={pickImage} className="p-2">
+              <Image
+                source={require("@/assets/images/placeholder.jpg")}
+                className="w-10 h-10 rounded-md"
+              />
+            </TouchableOpacity>
 
-          <TouchableOpacity onPress={takePicture}>
-            <View className="w-20 h-20 border-4 border-white rounded-full flex items-center justify-center bg-blue-900"></View>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={takePicture}>
+              <View className="w-20 h-20 border-4 border-white rounded-full flex items-center justify-center bg-blue-900"></View>
+            </TouchableOpacity>
 
-          <TouchableOpacity onPress={toggleFlash} className="p-2">
-            <Ionicons
-              name={isFlashOn ? "flash" : "flash-off"}
-              size={28}
-              color="white"
-            />
-          </TouchableOpacity>
-        </View>
-      </CameraView>
+            <TouchableOpacity onPress={toggleFlash} className="p-2">
+              <Ionicons
+                name={isFlashOn ? "flash" : "flash-off"}
+                size={28}
+                color="white"
+              />
+            </TouchableOpacity>
+          </View>
+        </CameraView>
+      )}
     </View>
   );
 };
