@@ -83,6 +83,7 @@ export default function TabLayout() {
               color={color}
             />
           ),
+          tabBarLabel: "Camera",
         }}
       />
       <Tabs.Screen
@@ -99,6 +100,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name={focused ? "mic" : "mic-outline"} color={color} />
           ),
+          tabBarLabel: "Conversation",
         }}
       />
       <Tabs.Screen
@@ -149,6 +151,7 @@ export default function TabLayout() {
               color={color}
             />
           ),
+          tabBarLabel: "History",
         }}
       />
       <Tabs.Screen
@@ -166,6 +169,7 @@ export default function TabLayout() {
               color={color}
             />
           ),
+          tabBarLabel: "Favorite",
         }}
       />
     </Tabs>
