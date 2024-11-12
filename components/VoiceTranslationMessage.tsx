@@ -122,7 +122,7 @@ export default function VoiceTranslationMessage({
   return (
     <TouchableOpacity onPress={handleDoublePress} activeOpacity={1}>
       <View className={`min-w-[140px] ${className}`}>
-        <View className="relative px-4 py-2 bg-white rounded-xl shadow-sm gap-1 max-w-[250px]">
+        <View className="relative px-4 py-2 bg-white rounded-xl shadow-sm max-w-[250px]">
           <View className="text-base relative pr-2">
             <TextInput
               ref={textInputRef}
@@ -143,7 +143,7 @@ export default function VoiceTranslationMessage({
               }
             />
           </View>
-          <View className="w-full h-px bg-[#969696]"></View>
+          <View className="w-full h-px my-1 bg-[#969696]"></View>
           <View className="text-base pr-2">
             <TextInput
               ref={textInputRef}

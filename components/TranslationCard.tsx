@@ -62,9 +62,9 @@ export default function TranslationCard({
         <View className="relative px-7 py-4 bg-white rounded-xl shadow-sm">
           <TouchableOpacity className="gap-2" onPress={handleViewTranslation}>
             <View className="flex flex-row items-center text-base pr-5">
-              <Text className="font-semibold w-5">{source_language}</Text>
+              <Text className="font-semibold w-6">{source_language}</Text>
               <Text
-                className="ml-4 text-[#036]"
+                className="ml-3 text-[#036]"
                 numberOfLines={3}
                 ellipsizeMode="tail"
               >
@@ -73,9 +73,9 @@ export default function TranslationCard({
             </View>
             <View className="w-full h-px bg-[#969696]"></View>
             <View className="flex flex-row items-center text-base pr-5">
-              <Text className="w-5 font-semibold">{target_language}</Text>
+              <Text className="w-6 font-semibold">{target_language}</Text>
               <Text
-                className="ml-4 text-[#060]"
+                className="ml-3 text-[#060]"
                 numberOfLines={3}
                 ellipsizeMode="tail"
               >
