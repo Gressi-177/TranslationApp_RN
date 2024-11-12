@@ -1,3 +1,4 @@
+import { Audio } from "expo-av";
 import * as Clipboard from "expo-clipboard";
 import * as Speech from "expo-speech";
 import { useSQLiteContext } from "expo-sqlite";
@@ -46,7 +47,7 @@ const HomePage = () => {
   useEffect(() => {
     if (transcription) {
       setSourceText(transcription);
-      translateText(transcription);
+      // translateText(transcription);
     }
   }, [transcription]);
 
@@ -102,6 +103,9 @@ const HomePage = () => {
   };
 
   const voiceText = async (text: string, language: string) => {
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+    });
     const isSpeaking = await Speech.isSpeakingAsync();
 
     if (isSpeaking) {
