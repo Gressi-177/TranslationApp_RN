@@ -20,16 +20,13 @@ export const postAudio = async (
     body: JSON.stringify(jsonPayload),
   });
 
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
   return response.json();
 };
 
 export const postImage = async (uri: string) => {
   const name = uri.split("/").pop() || "unknown";
   const extension = name.split(".").pop();
+
   const formData = new FormData();
   formData.append("file", {
     uri,
@@ -37,19 +34,26 @@ export const postImage = async (uri: string) => {
     type: `image/${extension}`,
   } as any);
 
-  const response = await fetch(`${API_URL}/img2text`, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-    },
-    body: formData,
-  });
+  try {
+    const response = await fetch(`${API_URL}/img2text`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+      },
+      body: formData,
+    });
 
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    if (!response.ok) {
+      console.error(
+        `HTTP error! status: ${response.status}`,
+        await response.text()
+      );
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error("Fetch error:", error);
   }
-
-  return response.json();
 };
 
 export const postQuestion = async (question: string) => {
@@ -76,4 +80,37 @@ export const postQuestion = async (question: string) => {
   }
 
   return response.json();
+};
+
+export const postImageNew = async (uri: string) => {
+  const name = uri.split("/").pop() || "unknown";
+  const extension = name.split(".").pop();
+
+  const formData = new FormData();
+  formData.append("file", {
+    uri,
+    name,
+    type: `image/${extension}`,
+  } as any);
+
+  try {
+    const response = await fetch(`${API_URL}/ocr`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      console.error(
+        `HTTP error! status: ${response.status}`,
+        await response.text()
+      );
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error("Fetch error:", error);
+  }
 };

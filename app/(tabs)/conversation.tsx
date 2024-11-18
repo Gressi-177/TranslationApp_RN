@@ -1,6 +1,8 @@
+import { Audio } from "expo-av";
 import * as Speech from "expo-speech";
 import { useSQLiteContext } from "expo-sqlite";
 import React, { useEffect, useRef, useState } from "react";
+
 import {
   ActivityIndicator,
   Platform,
@@ -82,6 +84,9 @@ const ConversationPage = () => {
   }, [sourceLanguage, targetLanguage]);
 
   const voiceText = async (text: string, language: string) => {
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+    });
     const isSpeaking = await Speech.isSpeakingAsync();
 
     if (isSpeaking) {
