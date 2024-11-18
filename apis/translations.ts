@@ -1,4 +1,4 @@
-const API_URL = "http://192.168.210.23:8000/api/v1";
+const API_URL = "http://192.168.1.4:8000/api/v1";
 const AI_API_KEY = "AIzaSyDmizljnUniKUh0WU62rn6oEdT176JQ6Mc";
 const AI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${AI_API_KEY}`;
 
@@ -80,4 +80,37 @@ export const postQuestion = async (question: string) => {
   }
 
   return response.json();
+};
+
+export const postImageNew = async (uri: string) => {
+  const name = uri.split("/").pop() || "unknown";
+  const extension = name.split(".").pop();
+
+  const formData = new FormData();
+  formData.append("file", {
+    uri,
+    name,
+    type: `image/${extension}`,
+  } as any);
+
+  try {
+    const response = await fetch(`${API_URL}/ocr`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      console.error(
+        `HTTP error! status: ${response.status}`,
+        await response.text()
+      );
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error("Fetch error:", error);
+  }
 };

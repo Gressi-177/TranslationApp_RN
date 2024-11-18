@@ -11,7 +11,7 @@ import {
   View,
 } from "react-native";
 
-import { postImage } from "@/apis/translations";
+import { postImageNew } from "@/apis/translations";
 import LanguageChangedBox from "@/components/LanguageChangedBox";
 import useStoreGlobal from "@/stores/useStoreGlobal";
 import { optimizeImage } from "@/utils/base";
@@ -35,7 +35,7 @@ const CameraPage = () => {
     try {
       setIsLoading(true);
       const optimizedUri = await optimizeImage(uri);
-      const result = await postImage(optimizedUri);
+      const result = await postImageNew(optimizedUri);
       setSourceText(result.text);
       setCapturedImage(null);
       router.replace("/(tabs)/?ref=camera");
