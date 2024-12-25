@@ -50,7 +50,6 @@ const CameraPage = () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
-      aspect: [4, 3],
       quality: 1,
     });
 
@@ -61,7 +60,7 @@ const CameraPage = () => {
 
   const takePicture = async () => {
     if (cameraRef.current) {
-      const options = { quality: 0.5, base64: true, fixOrientation: true };
+      const options = { quality: 1, base64: true, fixOrientation: true };
       const data = await cameraRef.current.takePictureAsync(options);
 
       if (!data) return;
