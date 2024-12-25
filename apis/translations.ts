@@ -1,5 +1,5 @@
-const API_URL = "http://192.168.1.4:8000/api/v1";
-const AI_API_KEY = "AIzaSyDmizljnUniKUh0WU62rn6oEdT176JQ6Mc";
+const API_URL = "http://192.168.70.23:8000/api/v1";
+const AI_API_KEY = "AIzaSyA4-YkL4eoCKWNfYgQdyERDz8YgQph113A";
 const AI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${AI_API_KEY}`;
 
 export const postAudio = async (
